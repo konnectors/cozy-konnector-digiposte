@@ -1,0 +1,30 @@
+{
+  "name": "cozy-konnector-digiposte",
+  "version": "1.0.0",
+  "description": "Import your digiposte files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cozy/cozy-konnector-digiposte.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "standalone": "cozy-konnector-standalone",
+    "dev": "cozy-konnector-dev",
+    "build": "webpack",
+    "lint": "standard --fix index.js",
+    "deploy:travis": "git-directory-deploy --username Cozy --email contact@cozycloud.cc --directory build/ --repo=https://$GITHUB_TOKEN@github.com/cozy/cozy-konnector-digiposte.git",
+    "deploy": "git-directory-deploy --directory build/ --branch build --repo=https://github.com/cozy/cozy-konnector-digiposte.git"
+  },
+  "author": "doubleface",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "cozy-konnector-libs": "^3.0.0-alpha.8",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^4.0.1",
+    "webpack": "^3.1.0"
+  }
+}

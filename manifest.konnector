@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "name": "Digiposte",
+  "type": "node",
+  "slug": "digiposte",
+  "description": "Get the bills from digiposte",
+  "source": "git://github.com/cozy/cozy-konnector-digiposte.git",
+  "permissions": {
+    "bills": {
+      "description": "Required to save the bills data",
+      "type": "io.cozy.bills"
+    },
+    "files": {
+      "description": "Required to save files",
+      "type": "io.cozy.files"
+    },
+    "accounts": {
+      "description": "Required to get the account's data",
+      "type": "io.cozy.accounts",
+      "verbs": ["GET"]
+    }
+  },
+  "developer": {
+    "name": "cozy",
+    "url": "cozy.io"
+  }
+}
