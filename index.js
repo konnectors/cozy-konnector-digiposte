@@ -1,6 +1,6 @@
 'use strict'
 
-const { BaseKonnector, log, saveFiles } = require('cozy-konnector-libs')
+const { BaseKonnector, log, saveFiles, cozyClient } = require('cozy-konnector-libs')
 
 module.exports = new BaseKonnector(function (fields) {
   return fetchBills(fields)
@@ -158,7 +158,8 @@ function fetchBills (requiredFields) {
   .then(folders => {
     return bb.each(folders, folder => {
       log('info', 'Getting vendor ' + folder.name)
-      return saveFiles(folder.docs, requiredFields.folderPath)
+      return mkdirp(requiredFields.folderPath, folder.name)
+      .then(() => saveFiles(folder.docs, `${requiredFields.folderPath}/${folder.name}`))
     })
   })
 }
@@ -175,4 +176,19 @@ function getFileName (doc) {
     result = doc.filename
   }
   return result
+}
+
+// create a folder if it does not already exist
+function mkdirp (path, folderName) {
+  folderName = sanitizeFolderName(folderName)
+  return cozyClient.files.statByPath(`${path}/${folderName}`)
+  .catch(err => {
+    log('info', err.message, `${path} folder does not exist yet, creating it`)
+    return cozyClient.files.statByPath(`${path}`)
+    .then(parentFolder => cozyClient.files.createDirectory({name: folderName, dirID: parentFolder._id}))
+  })
+}
+
+function sanitizeFolderName (foldername) {
+  return foldername.replace(/^\.+$/, '').replace(/[/?<>\\:*|":]/g, '')
 }
