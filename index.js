@@ -7,6 +7,7 @@ module.exports = new BaseKonnector(function (fields) {
 })
 
 function fetchBills (requiredFields) {
+  const fulltimeout = Date.now() + 60 * 1000
   let request = require('request-promise')
   const j = request.jar()
   // require('request-debug')(request)
@@ -156,10 +157,14 @@ function fetchBills (requiredFields) {
     })
   })
   .then(folders => {
-    return bb.each(folders, folder => {
+    return bb.each(folders, (folder, index, length) => {
+      const remainingTime = fulltimeout - Date.now()
+      const timeForThisFolder = remainingTime / (length - index)
       log('info', 'Getting vendor ' + folder.name)
       return mkdirp(requiredFields.folderPath, folder.name)
-      .then(() => saveFiles(folder.docs, `${requiredFields.folderPath}/${folder.name}`))
+      .then(() => saveFiles(folder.docs, `${requiredFields.folderPath}/${folder.name}`, {
+        timeout: Date.now() + timeForThisFolder
+      }))
     })
   })
 }
