@@ -2797,7 +2797,7 @@ const util = __webpack_require__(1)
 util.inspect.defaultOptions.maxArrayLength = null
 util.inspect.defaultOptions.colors = true
 
-const env = process.env.NODE_ENV
+const env = process.env.NODE_ENV || ''
 const env2formats = {
   '': prodFormat,
   production: prodFormat,
