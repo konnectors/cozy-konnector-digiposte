@@ -132,11 +132,11 @@ function fetchBills (requiredFields) {
         json: true
       })
       .then(folder => {
-        result.docs = folder.documents.filter((doc, index) => index < 1).map(doc => ({
+        result.docs = folder.documents.map(doc => ({
           docid: doc.id,
           type: doc.category,
           fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
-          filename: `${doc.sender_name}_${doc.id}.pdf`,
+          filename: getFileName(doc),
           vendor: doc.sender_name,
           requestOptions: {
             jar: j,
@@ -161,4 +161,18 @@ function fetchBills (requiredFields) {
       return saveFiles(folder.docs, requiredFields.folderPath)
     })
   })
+}
+
+function getFileName (doc) {
+  let result = null
+  if (doc.invoice) {
+    // a lot of invoices have the name Facture.pdf. I try to construct a more meaningfull and
+    // unique name with invoice information
+    let date = new Date(doc.invoice_data.due_on)
+    date = date.toLocaleDateString()
+    result = `Facture_${date}_${doc.invoice_data.chargeable_amount}${doc.invoice_data.currency}.pdf`
+  } else {
+    result = doc.filename
+  }
+  return result
 }
