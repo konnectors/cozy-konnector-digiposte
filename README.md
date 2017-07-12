@@ -1,4 +1,4 @@
-[Cozy][cozy] <YOUR SUPER NEW KONNECTOR NAME>
+[Cozy][cozy] DIGIPOSTE CONNECTOR
 =======================================
 
 What's Cozy?
@@ -11,7 +11,7 @@ What's Cozy?
 What's this new konnector?
 --------------------------
 
-<YOUR DESCRIPTION HERE>
+This connector imports all the files from your digiposte account into your cozy
 
 ### Open a Pull-Request
 
@@ -105,7 +105,7 @@ This command will commit and push your built in the branch `build` fo your proje
 
 And your konnector can now be installed using the following url :
 
-git://github.com/cozy/cozy-konnector-<yourkonnector>.git#build
+git://github.com/cozy/cozy-konnector-digiposte.git#build
 
 ### Build using Travis CI
 
@@ -138,7 +138,7 @@ yarn lint
 
 ### Maintainer
 
-The lead maintainers for this konnector is <YOUR NAME>
+The lead maintainers for this konnector is doubleface
 
 
 ### Get in touch
@@ -154,7 +154,7 @@ You can reach the Cozy Community by:
 License
 -------
 
-<YOUR KONNECTOR NAME> is developed by <your name> and distributed under the [AGPL v3 license][agpl-3.0].
+cozy-konnector-digiposte is developed by doubleface and distributed under the [AGPL v3 license][agpl-3.0].
 
 [cozy]: https://cozy.io "Cozy Cloud"
 [agpl-3.0]: https://www.gnu.org/licenses/agpl-3.0.html
