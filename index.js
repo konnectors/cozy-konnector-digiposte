@@ -108,12 +108,14 @@ function fetchBills (requiredFields) {
     let foldernames = body.folders.map(folder => folder.name)
     log('debug', JSON.stringify(foldernames), 'List of folders')
     log('info', 'Getting the list of documents for each folder')
+    body.folders.unshift({
+      id: '',
+      name: ''
+    })
     return bb.mapSeries(body.folders, folder => {
       let result = {
         id: folder.id,
-        name: folder.name,
-        logo: folder.sender_logo,
-        url: folder.sender_url_selfcare
+        name: folder.name
       }
       log('info', folder.name + '...')
       return request({
@@ -143,7 +145,7 @@ function fetchBills (requiredFields) {
           filename: getFileName(doc),
           vendor: doc.sender_name
         }))
-        log('info', '' + result.docs.length + ' bill(s)')
+        log('info', '' + result.docs.length + ' document(s)')
         return result
       })
     })
