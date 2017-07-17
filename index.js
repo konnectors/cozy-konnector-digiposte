@@ -11,7 +11,6 @@ function fetchBills (requiredFields) {
   let request = require('request-promise')
   const j = request.jar()
   // require('request-debug')(request)
-
   const cheerio = require('cheerio')
   const bb = require('bluebird')
   request = request.defaults({
@@ -75,12 +74,14 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the access token
     log('info', 'Getting the app access token')
+    request = request.defaults({
+      json: true
+    })
     return request({
       uri: 'https://secure.digiposte.fr/rest/security/tokens',
       headers: {
         'X-XSRF-TOKEN': xsrfToken
-      },
-      json: true
+      }
     })
   })
   .then(body => {
@@ -94,11 +95,12 @@ function fetchBills (requiredFields) {
     log('info', 'Getting the list of folders')
     return request({
       uri: 'https://secure.digiposte.fr/api/v3/folders/safe',
-      headers: {
-        'X-XSRF-TOKEN': xsrfToken,
-        'Authorization': `Bearer ${accessToken}`
+      auth: {
+        bearer: accessToken
       },
-      json: true
+      headers: {
+        'X-XSRF-TOKEN': xsrfToken
+      }
     })
   })
   .then(body => {
@@ -126,11 +128,12 @@ function fetchBills (requiredFields) {
           locations: ['SAFE', 'INBOX']
         },
         method: 'POST',
-        headers: {
-          'X-XSRF-TOKEN': xsrfToken,
-          'Authorization': `Bearer ${accessToken}`
+        auth: {
+          bearer: accessToken
         },
-        json: true
+        headers: {
+          'X-XSRF-TOKEN': xsrfToken
+        }
       })
       .then(folder => {
         result.docs = folder.documents.map(doc => ({
@@ -138,18 +141,7 @@ function fetchBills (requiredFields) {
           type: doc.category,
           fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
           filename: getFileName(doc),
-          vendor: doc.sender_name,
-          requestOptions: {
-            jar: j,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:36.0) ' +
-                            'Gecko/20100101 Firefox/36.0'
-            },
-            method: 'POST',
-            form: {
-              'document_ids[]': doc.id
-            }
-          }
+          vendor: doc.sender_name
         }))
         log('info', '' + result.docs.length + ' bill(s)')
         return result
