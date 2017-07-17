@@ -43109,7 +43109,6 @@ function fetchBills (requiredFields) {
   let request = __webpack_require__(271)
   const j = request.jar()
   // require('request-debug')(request)
-
   const cheerio = __webpack_require__(273)
   const bb = __webpack_require__(80)
   request = request.defaults({
@@ -43173,12 +43172,14 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the access token
     log('info', 'Getting the app access token')
+    request = request.defaults({
+      json: true
+    })
     return request({
       uri: 'https://secure.digiposte.fr/rest/security/tokens',
       headers: {
         'X-XSRF-TOKEN': xsrfToken
-      },
-      json: true
+      }
     })
   })
   .then(body => {
@@ -43192,11 +43193,12 @@ function fetchBills (requiredFields) {
     log('info', 'Getting the list of folders')
     return request({
       uri: 'https://secure.digiposte.fr/api/v3/folders/safe',
-      headers: {
-        'X-XSRF-TOKEN': xsrfToken,
-        'Authorization': `Bearer ${accessToken}`
+      auth: {
+        bearer: accessToken
       },
-      json: true
+      headers: {
+        'X-XSRF-TOKEN': xsrfToken
+      }
     })
   })
   .then(body => {
@@ -43204,12 +43206,14 @@ function fetchBills (requiredFields) {
     let foldernames = body.folders.map(folder => folder.name)
     log('debug', JSON.stringify(foldernames), 'List of folders')
     log('info', 'Getting the list of documents for each folder')
+    body.folders.unshift({
+      id: '',
+      name: ''
+    })
     return bb.mapSeries(body.folders, folder => {
       let result = {
         id: folder.id,
-        name: folder.name,
-        logo: folder.sender_logo,
-        url: folder.sender_url_selfcare
+        name: folder.name
       }
       log('info', folder.name + '...')
       return request({
@@ -43224,11 +43228,12 @@ function fetchBills (requiredFields) {
           locations: ['SAFE', 'INBOX']
         },
         method: 'POST',
-        headers: {
-          'X-XSRF-TOKEN': xsrfToken,
-          'Authorization': `Bearer ${accessToken}`
+        auth: {
+          bearer: accessToken
         },
-        json: true
+        headers: {
+          'X-XSRF-TOKEN': xsrfToken
+        }
       })
       .then(folder => {
         result.docs = folder.documents.map(doc => ({
@@ -43236,20 +43241,9 @@ function fetchBills (requiredFields) {
           type: doc.category,
           fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
           filename: getFileName(doc),
-          vendor: doc.sender_name,
-          requestOptions: {
-            jar: j,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:36.0) ' +
-                            'Gecko/20100101 Firefox/36.0'
-            },
-            method: 'POST',
-            form: {
-              'document_ids[]': doc.id
-            }
-          }
+          vendor: doc.sender_name
         }))
-        log('info', '' + result.docs.length + ' bill(s)')
+        log('info', '' + result.docs.length + ' document(s)')
         return result
       })
     })
@@ -99839,34 +99833,29 @@ module.exports = baseMap;
 /***/ (function(module, exports) {
 
 module.exports = {
-	"_args": [
-		[
-			"cheerio@1.0.0-rc.2",
-			"/home/doubleface/Workspace/cozy-konnector-digiposte"
-		]
-	],
-	"_from": "cheerio@1.0.0-rc.2",
+	"_from": "cheerio@^1.0.0-rc.2",
 	"_id": "cheerio@1.0.0-rc.2",
 	"_inBundle": false,
 	"_integrity": "sha1-S59TqBsn5NXawxwP/Qz6A8xoMNs=",
 	"_location": "/cheerio",
 	"_phantomChildren": {},
 	"_requested": {
-		"type": "version",
+		"type": "range",
 		"registry": true,
-		"raw": "cheerio@1.0.0-rc.2",
+		"raw": "cheerio@^1.0.0-rc.2",
 		"name": "cheerio",
 		"escapedName": "cheerio",
-		"rawSpec": "1.0.0-rc.2",
+		"rawSpec": "^1.0.0-rc.2",
 		"saveSpec": null,
-		"fetchSpec": "1.0.0-rc.2"
+		"fetchSpec": "^1.0.0-rc.2"
 	},
 	"_requiredBy": [
 		"/cozy-konnector-libs"
 	],
 	"_resolved": "https://registry.npmjs.org/cheerio/-/cheerio-1.0.0-rc.2.tgz",
-	"_spec": "1.0.0-rc.2",
-	"_where": "/home/doubleface/Workspace/cozy-konnector-digiposte",
+	"_shasum": "4b9f53a81b27e4d5dac31c0ffd0cfa03cc6830db",
+	"_spec": "cheerio@^1.0.0-rc.2",
+	"_where": "/home/doubleface/Workspace/cozy-konnector-digiposte/node_modules/cozy-konnector-libs",
 	"author": {
 		"name": "Matt Mueller",
 		"email": "mattmuelle@gmail.com",
@@ -99875,6 +99864,7 @@ module.exports = {
 	"bugs": {
 		"url": "https://github.com/cheeriojs/cheerio/issues"
 	},
+	"bundleDependencies": false,
 	"dependencies": {
 		"css-select": "~1.2.0",
 		"dom-serializer": "~0.1.0",
@@ -99883,6 +99873,7 @@ module.exports = {
 		"lodash": "^4.15.0",
 		"parse5": "^3.0.1"
 	},
+	"deprecated": false,
 	"description": "Tiny, fast, and elegant implementation of core jQuery designed specifically for the server",
 	"devDependencies": {
 		"benchmark": "^2.1.0",

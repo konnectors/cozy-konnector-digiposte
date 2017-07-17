@@ -19,14 +19,13 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.0",
-    "cozy-konnector-libs": "^3.0.0-alpha.11",
+    "cozy-konnector-libs": "^3.0.0-alpha.13",
     "request": "^2.81.0",
-    "request-debug": "^0.2.0",
     "request-promise": "^4.2.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^4.0.1",
     "git-directory-deploy": "^1.5.1",
-    "webpack": "^3.2.0"
+    "webpack": "^3.3.0"
   }
 }
