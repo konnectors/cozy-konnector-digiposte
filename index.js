@@ -194,7 +194,7 @@ function fetchFolder (body, rootPath, timeout) {
       }))
       .then(() => {
         if (folder.name !== '') {
-          return fetchFolder(folder, `${rootPath}/${sanitizeFolderName(folder.name)}`)
+          return fetchFolder(folder, `${rootPath}/${sanitizeFolderName(folder.name)}`, Date.now() + timeForThisFolder)
         }
       })
     })
