@@ -43099,28 +43099,28 @@ module.exports = flatten;
 
 
 const { BaseKonnector, log, saveFiles, cozyClient } = __webpack_require__(332)
+const fulltimeout = Date.now() + 60 * 1000
+const bb = __webpack_require__(80)
+let request = __webpack_require__(271)
+const j = request.jar()
+const cheerio = __webpack_require__(273)
+
+// require('request-debug')(request)
+request = request.defaults({
+  jar: j,
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:36.0) ' +
+                  'Gecko/20100101 Firefox/36.0'
+  }
+})
+let xsrfToken = null
+let accessToken = null
 
 module.exports = new BaseKonnector(function (fields) {
   return fetchBills(fields)
 })
 
 function fetchBills (requiredFields) {
-  const fulltimeout = Date.now() + 60 * 1000
-  let request = __webpack_require__(271)
-  const j = request.jar()
-  // require('request-debug')(request)
-  const cheerio = __webpack_require__(273)
-  const bb = __webpack_require__(80)
-  request = request.defaults({
-    jar: j,
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:36.0) ' +
-                    'Gecko/20100101 Firefox/36.0'
-    }
-  })
-  let xsrfToken = null
-  let accessToken = null
-
   return request('https://secure.digiposte.fr/identification-plus')
   .then(body => {
     // getting the login token in the login form
@@ -43201,64 +43201,7 @@ function fetchBills (requiredFields) {
       }
     })
   })
-  .then(body => {
-    // Then, for each folder, get the logo, list of files : name, url, amount, date
-    let foldernames = body.folders.map(folder => folder.name)
-    log('debug', JSON.stringify(foldernames), 'List of folders')
-    log('info', 'Getting the list of documents for each folder')
-    body.folders.unshift({
-      id: '',
-      name: ''
-    })
-    return bb.mapSeries(body.folders, folder => {
-      let result = {
-        id: folder.id,
-        name: folder.name
-      }
-      log('info', folder.name + '...')
-      return request({
-        uri: 'https://secure.digiposte.fr/api/v3/documents/search',
-        qs: {
-          direction: 'DESCENDING',
-          max_results: 100,
-          sort: 'CREATION_DATE'
-        },
-        body: {
-          folder_id: result.id,
-          locations: ['SAFE', 'INBOX']
-        },
-        method: 'POST',
-        auth: {
-          bearer: accessToken
-        },
-        headers: {
-          'X-XSRF-TOKEN': xsrfToken
-        }
-      })
-      .then(folder => {
-        result.docs = folder.documents.map(doc => ({
-          docid: doc.id,
-          type: doc.category,
-          fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
-          filename: getFileName(doc),
-          vendor: doc.sender_name
-        }))
-        log('info', '' + result.docs.length + ' document(s)')
-        return result
-      })
-    })
-  })
-  .then(folders => {
-    return bb.each(folders, (folder, index, length) => {
-      const remainingTime = fulltimeout - Date.now()
-      const timeForThisFolder = remainingTime / (length - index)
-      log('info', 'Getting vendor ' + folder.name)
-      return mkdirp(requiredFields.folderPath, folder.name)
-      .then(() => saveFiles(folder.docs, `${requiredFields.folderPath}/${folder.name}`, {
-        timeout: Date.now() + timeForThisFolder
-      }))
-    })
-  })
+  .then(body => fetchFolder(body, requiredFields.folderPath, fulltimeout))
 }
 
 function getFileName (doc) {
@@ -43288,6 +43231,72 @@ function mkdirp (path, folderName) {
 
 function sanitizeFolderName (foldername) {
   return foldername.replace(/^\.+$/, '').replace(/[/?<>\\:*|":]/g, '')
+}
+
+function fetchFolder (body, rootPath, timeout) {
+  // Then, for each folder, get the logo, list of files : name, url, amount, date
+  body.folders = body.folders || []
+  let foldernames = body.folders.map(folder => folder.name)
+  log('debug', foldernames, 'List of folders')
+  log('info', 'Getting the list of documents for each folder')
+
+  // If this is the root folder, also fetch it's documents
+  if (!body.name) body.folders.unshift({ id: '', name: '' })
+
+  return bb.mapSeries(body.folders, folder => {
+    let result = {
+      id: folder.id,
+      name: folder.name,
+      folders: folder.folders
+    }
+    log('info', folder.name + '...')
+    return request({
+      uri: 'https://secure.digiposte.fr/api/v3/documents/search',
+      qs: {
+        direction: 'DESCENDING',
+        max_results: 100,
+        sort: 'CREATION_DATE'
+      },
+      body: {
+        folder_id: result.id,
+        locations: ['SAFE', 'INBOX']
+      },
+      method: 'POST',
+      auth: {
+        bearer: accessToken
+      },
+      headers: {
+        'X-XSRF-TOKEN': xsrfToken
+      }
+    })
+    .then(folder => {
+      result.docs = folder.documents.map(doc => ({
+        docid: doc.id,
+        type: doc.category,
+        fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
+        filename: getFileName(doc),
+        vendor: doc.sender_name
+      }))
+      log('info', '' + result.docs.length + ' document(s)')
+      return result
+    })
+  })
+  .then(folders => {
+    return bb.each(folders, (folder, index, length) => {
+      const remainingTime = timeout - Date.now()
+      const timeForThisFolder = remainingTime / (length - index)
+      log('info', 'Getting vendor ' + folder.name)
+      return mkdirp(rootPath, folder.name)
+      .then(() => saveFiles(folder.docs, `${rootPath}/${folder.name}`, {
+        timeout: Date.now() + timeForThisFolder
+      }))
+      .then(() => {
+        if (folder.name !== '') {
+          return fetchFolder(folder, `${rootPath}/${sanitizeFolderName(folder.name)}`)
+        }
+      })
+    })
+  })
 }
 
 
