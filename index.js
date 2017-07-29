@@ -1,20 +1,16 @@
 'use strict'
 
-const { BaseKonnector, log, saveFiles, cozyClient } = require('cozy-konnector-libs')
+const { BaseKonnector, log, saveFiles, cozyClient, request } = require('cozy-konnector-libs')
 const fulltimeout = Date.now() + 60 * 1000
 const bb = require('bluebird')
-let request = require('request-promise')
-const j = request.jar()
-const cheerio = require('cheerio')
-
-// require('request-debug')(request)
-request = request.defaults({
-  jar: j,
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:36.0) ' +
-                  'Gecko/20100101 Firefox/36.0'
-  }
+let rq = request()
+const j = rq.jar()
+rq = request({
+  cheerio: true,
+  json: false,
+  jar: j
 })
+
 let xsrfToken = null
 let accessToken = null
 
@@ -23,10 +19,9 @@ module.exports = new BaseKonnector(function (fields) {
 })
 
 function fetchBills (requiredFields) {
-  return request('https://secure.digiposte.fr/identification-plus')
-  .then(body => {
+  return rq('https://secure.digiposte.fr/identification-plus')
+  .then($ => {
     // getting the login token in the login form
-    const $ = cheerio.load(body)
     const loginToken = $('#credentials_recover_account__token').val()
     if (loginToken === undefined) {
       throw new Error('Could not get the login token')
@@ -36,13 +31,13 @@ function fetchBills (requiredFields) {
   .then(loginToken => {
     log('info', `The login token is ${loginToken}`)
     // now posting login request
-    return request({
+    rq = request()
+    return rq({
       uri: 'https://secure.digiposte.fr/login_check',
       qs: {
         isLoginPlus: 1
       },
       method: 'POST',
-      followAllRedirects: true,
       form: {
         'login_plus[userType]': 'part',
         'login_plus[login]': requiredFields.email,
@@ -74,15 +69,12 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the access token
     log('info', 'Getting the app access token')
-    request = request.defaults({
-      json: true
-    })
-    return request({
-      uri: 'https://secure.digiposte.fr/rest/security/tokens',
+    rq = rq.defaults({
       headers: {
         'X-XSRF-TOKEN': xsrfToken
       }
     })
+    return rq('https://secure.digiposte.fr/rest/security/tokens')
   })
   .then(body => {
     if (body && body.access_token) {
@@ -93,15 +85,12 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the list of folders
     log('info', 'Getting the list of folders')
-    return request({
-      uri: 'https://secure.digiposte.fr/api/v3/folders/safe',
+    rq = rq.defaults({
       auth: {
         bearer: accessToken
-      },
-      headers: {
-        'X-XSRF-TOKEN': xsrfToken
       }
     })
+    return rq('https://secure.digiposte.fr/api/v3/folders/safe')
   })
   .then(body => fetchFolder(body, requiredFields.folderPath, fulltimeout))
 }
@@ -152,7 +141,7 @@ function fetchFolder (body, rootPath, timeout) {
       folders: folder.folders
     }
     log('info', folder.name + '...')
-    return request({
+    return rq({
       uri: 'https://secure.digiposte.fr/api/v3/documents/search',
       qs: {
         direction: 'DESCENDING',
@@ -163,13 +152,7 @@ function fetchFolder (body, rootPath, timeout) {
         folder_id: result.id,
         locations: ['SAFE', 'INBOX']
       },
-      method: 'POST',
-      auth: {
-        bearer: accessToken
-      },
-      headers: {
-        'X-XSRF-TOKEN': xsrfToken
-      }
+      method: 'POST'
     })
     .then(folder => {
       result.docs = folder.documents.map(doc => ({
@@ -177,7 +160,14 @@ function fetchFolder (body, rootPath, timeout) {
         type: doc.category,
         fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
         filename: getFileName(doc),
-        vendor: doc.sender_name
+        vendor: doc.sender_name,
+        requestOptions: {
+          method: 'POST',
+          jar: j,
+          form: {
+            'document_ids[]': doc.id
+          }
+        }
       }))
       log('info', '' + result.docs.length + ' document(s)')
       return result
