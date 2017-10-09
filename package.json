@@ -13,7 +13,9 @@
     "dev": "cozy-konnector-dev",
     "build": "webpack",
     "lint": "standard --fix index.js",
-    "standalone": "cozy-konnector-standalone"
+    "standalone": "cozy-konnector-standalone",
+    "test": "jest --verbose --coverage",
+    "test:watch": "jest --verbose --coverage --watch"
   },
   "author": "doubleface",
   "license": "MIT",
@@ -24,6 +26,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^4.0.1",
     "git-directory-deploy": "^1.5.1",
+    "jest": "^21.2.1",
     "webpack": "^3.4.1"
   }
 }
