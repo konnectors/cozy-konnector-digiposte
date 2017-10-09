@@ -14,8 +14,8 @@
     "build": "webpack",
     "lint": "standard --fix index.js",
     "standalone": "cozy-konnector-standalone",
-    "test": "jest --verbose --coverage",
-    "test:watch": "jest --verbose --coverage --watch"
+    "test": "NODE_ENV=test jest --verbose --coverage",
+    "test:watch": "NODE_ENV=test jest --verbose --coverage --watch"
   },
   "author": "doubleface",
   "license": "MIT",
@@ -24,9 +24,18 @@
     "cozy-konnector-libs": "^3.0.2"
   },
   "devDependencies": {
+    "babel-jest": "^21.2.0",
+    "babel-preset-es2015": "^6.24.1",
     "copy-webpack-plugin": "^4.0.1",
     "git-directory-deploy": "^1.5.1",
     "jest": "^21.2.1",
     "webpack": "^3.4.1"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "es6"
+    ]
   }
 }
