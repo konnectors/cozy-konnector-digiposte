@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getFileName inserts date into account situations 1`] = `"Relevé de compte_2017-10-9.pdf"`;
+
+exports[`getFileName inserts date into bill 1`] = `"Facture_2017-10-9_42€.pdf"`;
+
+exports[`getFileName inserts date into file with no extensions 1`] = `"Décidément rien ne va_2017-10-9"`;
+
+exports[`getFileName returns file name when incorrect date 1`] = `"Relevé de compte.pdf"`;
+
+exports[`getFileName returns file name when no date 1`] = `"Relevé de compte.pdf"`;
