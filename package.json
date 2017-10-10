@@ -20,8 +20,10 @@
   "author": "doubleface",
   "license": "MIT",
   "dependencies": {
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "bluebird": "^3.5.0",
-    "cozy-konnector-libs": "^3.0.2"
+    "cozy-konnector-libs": "^3.0.3"
   },
   "devDependencies": {
     "babel-jest": "^21.2.0",
