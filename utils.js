@@ -1,8 +1,8 @@
-const { format } = require('date-fns')
+import { format } from 'date-fns'
 
 const fileDateFormat = (date) => format(date, 'YYYY-MM-D')
 
-const getFileName = (doc) => {
+export const getFileName = (doc) => {
   if (doc.invoice) {
     // a lot of invoices have the name Facture.pdf. I try to construct a more meaningfull and
     // unique name with invoice information
@@ -36,8 +36,4 @@ const getFileName = (doc) => {
 
     return `${accumulator}${index ? '.' : ''}${fragment}`
   }, '')
-}
-
-module.exports = {
-  getFileName: getFileName
 }
