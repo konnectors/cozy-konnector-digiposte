@@ -8,6 +8,20 @@ module.exports = {
     path: path.join(__dirname, 'build'),
     filename: 'index.js'
   },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules\/(?!(cozy-konnector-libs)\/).*/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env']
+          }
+        }
+      }
+    ]
+  },
   plugins: [
     new CopyPlugin([
       { from: 'manifest.konnector' },

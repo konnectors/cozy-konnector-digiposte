@@ -3,6 +3,9 @@
 .token.json
 konnector-dev-config.json
 
+# Coverage
+coverage/
+
 # NPM
 node_modules/
 npm-debug.log
