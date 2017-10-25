@@ -1,7 +1,7 @@
 # Connector config
 .account
 .token.json
-konnector-dev-config.json
+konnector-dev-config.json*
 
 # Coverage
 coverage/
