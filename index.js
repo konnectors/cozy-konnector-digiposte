@@ -1,6 +1,6 @@
 'use strict'
 
-const { BaseKonnector, log, saveFiles, cozyClient, request } = require('cozy-konnector-libs')
+const { BaseKonnector, log, saveFiles, cozyClient, request, errors } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
 const fulltimeout = Date.now() + 60 * 1000
 const bb = require('bluebird')
@@ -16,7 +16,7 @@ let xsrfToken = null
 let accessToken = null
 
 module.exports = new BaseKonnector(function (fields) {
-  return fetchBills(fields)
+  return fetchBills.bind(this)(fields)
 })
 
 function fetchBills (requiredFields) {
@@ -32,7 +32,6 @@ function fetchBills (requiredFields) {
   .then(loginToken => {
     log('info', `The login token is ${loginToken}`)
     // now posting login request
-    rq = request()
     return rq({
       uri: 'https://secure.digiposte.fr/login_check',
       qs: {
@@ -51,7 +50,12 @@ function fetchBills (requiredFields) {
       }
     })
   })
-  .then(() => {
+  .then($ => {
+    if ($('#infoQuestion').length) {
+      log('warn', $('.dgplusContainer').text().trim())
+      return this.terminate(errors.USER_ACTION_NEEDED)
+    }
+
     // read the XSRF-TOKEN in the cookie jar and add it in the header
     log('info', 'Getting the XSRF token')
     const xsrfcookie = j.getCookies('https://secure.digiposte.fr/login_check')
@@ -70,6 +74,7 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the access token
     log('info', 'Getting the app access token')
+    rq = request()
     rq = rq.defaults({
       headers: {
         'X-XSRF-TOKEN': xsrfToken
