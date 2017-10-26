@@ -8,22 +8,37 @@
   },
   "main": "index.js",
   "scripts": {
-    "standalone": "cozy-konnector-standalone",
+    "deploy:travis": "git-directory-deploy --username Cozy --email contact@cozycloud.cc --directory build/ --repo=https://$GITHUB_TOKEN@github.com/cozy/cozy-konnector-digiposte.git",
+    "deploy": "git-directory-deploy --directory build/ --branch build --repo=https://github.com/cozy/cozy-konnector-digiposte.git",
     "dev": "cozy-konnector-dev",
     "build": "webpack",
     "lint": "standard --fix index.js",
-    "deploy:travis": "git-directory-deploy --username Cozy --email contact@cozycloud.cc --directory build/ --repo=https://$GITHUB_TOKEN@github.com/cozy/cozy-konnector-digiposte.git",
-    "deploy": "git-directory-deploy --directory build/ --branch build --repo=https://github.com/cozy/cozy-konnector-digiposte.git"
+    "standalone": "cozy-konnector-standalone",
+    "test": "NODE_ENV=test jest --verbose --coverage",
+    "test:watch": "NODE_ENV=test jest --verbose --coverage --watch"
   },
   "author": "doubleface",
   "license": "MIT",
   "dependencies": {
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "bluebird": "^3.5.0",
-    "cozy-konnector-libs": "^3.0.0-alpha.27"
+    "cozy-konnector-libs": "^3.0.3",
+    "date-fns": "^1.28.5"
   },
   "devDependencies": {
+    "babel-jest": "^21.2.0",
+    "babel-preset-es2015": "^6.24.1",
     "copy-webpack-plugin": "^4.0.1",
     "git-directory-deploy": "^1.5.1",
+    "jest": "^21.2.1",
     "webpack": "^3.4.1"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "es6"
+    ]
   }
 }
