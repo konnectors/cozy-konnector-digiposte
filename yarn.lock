@@ -1091,7 +1091,7 @@ chalk@^1.1.3:
     strip-ansi "^3.0.0"
     supports-color "^2.0.0"
 
-chalk@^2.0.0, chalk@^2.0.1:
+chalk@^2.0.0, chalk@^2.0.1, chalk@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.3.0.tgz#b5ea48efc9c1793dccc9b4767c93914d3f2d52ba"
   dependencies:
@@ -1189,10 +1189,6 @@ color-name@^1.1.1:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
 
-colors@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/colors/-/colors-1.1.2.tgz#168a4701756b6a7f51a12ce0c97bfa28c084ed63"
-
 combined-stream@^1.0.5, combined-stream@~1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/combined-stream/-/combined-stream-1.0.5.tgz#938370a57b4a51dea2c77c15d5c5fdf895164009"
@@ -1225,6 +1221,10 @@ command-line-usage@^4.0.0:
     array-back "^2.0.0"
     table-layout "^0.4.1"
     typical "^2.6.1"
+
+commander@^2.12.2:
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.13.0.tgz#6964bca67685df7c1f1430c584f07d7597885b9c"
 
 common-sequence@^1.0.2:
   version "1.0.2"
@@ -1312,22 +1312,25 @@ cozy-client-js@^0.3.17:
   version "0.3.19"
   resolved "https://registry.yarnpkg.com/cozy-client-js/-/cozy-client-js-0.3.19.tgz#c20361a8bc6b23eb4d092360040e8765ef5e59a3"
 
-cozy-konnector-libs@^3.0.3:
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-3.0.8.tgz#888c1858589ed2dfdd43a32dda69110856f9927e"
+cozy-konnector-libs@^3.0.0:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-3.2.5.tgz#cb4f10adf67fdc5fc5600f9009b77fe9a424f680"
   dependencies:
     babel-plugin-transform-object-rest-spread "^6.26.0"
     babel-preset-env "^1.6.0"
     bluebird "^3.5.0"
     bluebird-retry "^0.11.0"
     btoa "^1.1.2"
+    chalk "^2.3.0"
     cheerio "^1.0.0-rc.2"
-    colors "^1.1.2"
+    commander "^2.12.2"
     core-js "^2.4.1"
     cozy-client-js "^0.3.17"
+    date-fns "^1.29.0"
     isomorphic-fetch "^2.2.1"
     jest "^21.1.0"
     jsdoc-to-markdown "^3.0.0"
+    lodash "^4.17.4"
     moment "^2.18.1"
     opn "^5.1.0"
     regenerator-runtime "^0.11.0"
@@ -1438,7 +1441,7 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
-date-fns@^1.28.5:
+date-fns@^1.28.5, date-fns@^1.29.0:
   version "1.29.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.29.0.tgz#12e609cdcb935127311d04d33334e2960a2a54e6"
 
