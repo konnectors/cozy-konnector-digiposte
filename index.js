@@ -56868,7 +56868,7 @@ var _require = __webpack_require__(512),
 var _require2 = __webpack_require__(1000),
     getFileName = _require2.getFileName;
 
-var fulltimeout = Date.now() + 60 * 1000;
+var fulltimeout = Date.now() + 3 * 60 * 1000;
 var bb = __webpack_require__(50);
 var rq = request();
 var j = rq.jar();
