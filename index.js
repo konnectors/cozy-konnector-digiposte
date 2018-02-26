@@ -2,7 +2,7 @@
 
 const { BaseKonnector, log, saveFiles, cozyClient, request, errors } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
-const fulltimeout = Date.now() + 60 * 1000
+const fulltimeout = Date.now() + 3 * 60 * 1000
 const bb = require('bluebird')
 let rq = request()
 const j = rq.jar()
