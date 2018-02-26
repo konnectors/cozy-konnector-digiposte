@@ -1,12 +1,12 @@
 'use strict'
 
-const { BaseKonnector, log, saveFiles, cozyClient, request, errors } = require('cozy-konnector-libs')
+const { BaseKonnector, log, saveFiles, cozyClient, requestFactory, errors } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
 const fulltimeout = Date.now() + 3 * 60 * 1000
 const bb = require('bluebird')
-let rq = request()
-const j = rq.jar()
-rq = request({
+let request = requestFactory()
+const j = request.jar()
+request = requestFactory({
   cheerio: true,
   json: false,
   jar: j
@@ -20,7 +20,7 @@ module.exports = new BaseKonnector(function (fields) {
 })
 
 function fetchBills (requiredFields) {
-  return rq('https://secure.digiposte.fr/identification-plus')
+  return request('https://secure.digiposte.fr/identification-plus')
   .then($ => {
     // getting the login token in the login form
     const loginToken = $('#credentials_recover_account__token').val()
@@ -31,8 +31,8 @@ function fetchBills (requiredFields) {
   })
   .then(loginToken => {
     log('info', `The login token is ${loginToken}`)
-    // now posting login request
-    return rq({
+    // now posting login requestFactory
+    return request({
       uri: 'https://secure.digiposte.fr/login_check',
       qs: {
         isLoginPlus: 1
@@ -74,13 +74,13 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the access token
     log('info', 'Getting the app access token')
-    rq = request()
-    rq = rq.defaults({
+    request = requestFactory()
+    request = request.defaults({
       headers: {
         'X-XSRF-TOKEN': xsrfToken
       }
     })
-    return rq('https://secure.digiposte.fr/rest/security/tokens')
+    return request('https://secure.digiposte.fr/rest/security/tokens')
   })
   .then(body => {
     if (body && body.access_token) {
@@ -91,12 +91,12 @@ function fetchBills (requiredFields) {
   .then(() => {
     // Now get the list of folders
     log('info', 'Getting the list of folders')
-    rq = rq.defaults({
+    request = request.defaults({
       auth: {
         bearer: accessToken
       }
     })
-    return rq('https://secure.digiposte.fr/api/v3/folders/safe')
+    return request('https://secure.digiposte.fr/api/v3/folders/safe')
   })
   .then(body => fetchFolder(body, requiredFields.folderPath, fulltimeout))
 }
@@ -133,7 +133,7 @@ function fetchFolder (body, rootPath, timeout) {
       folders: folder.folders
     }
     log('info', folder.name + '...')
-    return rq({
+    return request({
       uri: 'https://secure.digiposte.fr/api/v3/documents/search',
       qs: {
         direction: 'DESCENDING',
