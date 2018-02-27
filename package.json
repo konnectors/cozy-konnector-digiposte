@@ -32,7 +32,7 @@
     "copy-webpack-plugin": "4.3.1",
     "git-directory-deploy": "1.5.1",
     "jest": "22.1.4",
-    "webpack": "3.10.0"
+    "webpack": "3.11.0"
   },
   "jest": {
     "moduleFileExtensions": [
