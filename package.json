@@ -11,9 +11,9 @@
     "deploy:travis": "git-directory-deploy --username Cozy --email contact@cozycloud.cc --directory build/ --repo=https://$GITHUB_TOKEN@github.com/cozy/cozy-konnector-digiposte.git",
     "deploy": "git-directory-deploy --directory build/ --branch build --repo=https://github.com/cozy/cozy-konnector-digiposte.git",
     "dev": "cozy-konnector-dev",
-    "build": "webpack",
+    "build": "rm -rf build && webpack",
     "lint": "standard --fix index.js",
-    "standalone": "cozy-konnector-standalone",
+    "standalone": "NODE_ENV=standalone rm -rf build && webpack && (cd build && cozy-konnector-standalone)",
     "test": "NODE_ENV=test jest --verbose --coverage",
     "test:watch": "NODE_ENV=test jest --verbose --coverage --watch"
   },
