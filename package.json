@@ -8,8 +8,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "deploy:travis": "git-directory-deploy --username Cozy --email contact@cozycloud.cc --directory build/ --repo=https://$GITHUB_TOKEN@github.com/cozy/cozy-konnector-digiposte.git",
-    "deploy": "git-directory-deploy --directory build/ --branch build --repo=https://github.com/cozy/cozy-konnector-digiposte.git",
+    "deploy": "git-directory-deploy --directory build/ --branch ${DEPLOY_BRANCH:-build} --repo=${DEPLOY_REPOSITORY:-https://$GITHUB_TOKEN@github.com/cozy/cozy-konnector-digiposte.git}",
     "dev": "cozy-konnector-dev",
     "build": "webpack",
     "lint": "standard --fix index.js",
