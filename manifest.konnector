@@ -1,10 +1,32 @@
 {
   "version": "1.0.0",
   "name": "Digiposte",
-  "type": "node",
+  "type": "konnector",
+  "language": "node",
+  "icon": "digiposte.svg",
   "slug": "digiposte",
-  "description": "Get the bills from digiposte",
-  "source": "git://github.com/cozy/cozy-konnector-digiposte.git",
+  "source": "git://github.com/cozy/cozy-konnector-digiposte.git#build",
+  "editor": "Cozy",
+  "vendor_link": "https://secure.digiposte.fr",
+  "categories": ["other"],
+  "screenshots": [],
+  "fields": {
+    "email": {
+      "type": "email"
+    },
+    "password": {
+      "type": "password"
+    },
+    "advancedFields": {
+      "folderPath": {
+        "advanced": true,
+        "isRequired": false
+      }
+    }
+  },
+  "data_types": [
+    "document"
+  ],
   "permissions": {
     "bills": {
       "description": "Required to save the bills data",
@@ -21,7 +43,18 @@
     }
   },
   "developer": {
-    "name": "cozy",
-    "url": "cozy.io"
+    "name": "Cozy Cloud",
+    "url": "https://cozy.io"
+  },
+  "langs": ["fr"],
+  "locales": {
+    "fr": {
+      "short_description": "Récupérer vos données Digiposte dans votre Cozy",
+      "long_description": "Ce fournisseur vous permettra de récupérer l'ensemble de vos documents Digiposte dans votre Cozy."
+    },
+    "en": {
+      "short_description": "Fetch your Digiposte data in your Cozy",
+      "long_description": "This provider will allow you to fetch all your Digiposte documents in your Cozy."
+    }
   }
 }
