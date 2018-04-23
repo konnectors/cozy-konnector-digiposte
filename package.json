@@ -1,6 +1,6 @@
 {
   "name": "cozy-konnector-digiposte",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Import your digiposte files",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "babel-jest": "22.4.3",
     "babel-preset-es2015": "6.24.1",
     "copy-webpack-plugin": "4.5.1",
-    "cozy-app-publish": "0.3.5",
+    "cozy-app-publish": "0.3.6",
     "git-directory-deploy": "1.5.1",
     "jest": "22.4.3",
     "webpack": "4.3.0",
