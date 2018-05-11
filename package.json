@@ -6,41 +6,49 @@
     "type": "git",
     "url": "git+https://github.com/cozy/cozy-konnector-digiposte.git"
   },
-  "main": "index.js",
-  "scripts": {
-    "dev": "cozy-konnector-dev",
-    "build": "webpack",
-    "lint": "standard --fix index.js",
-    "standalone": "cozy-konnector-standalone",
-    "test": "NODE_ENV=test jest --verbose --coverage",
-    "test:watch": "NODE_ENV=test jest --verbose --coverage --watch",
-    "deploy": "git-directory-deploy --directory build/ --branch ${DEPLOY_BRANCH:-build} --repo=${DEPLOY_REPOSITORY:-https://$GITHUB_TOKEN@github.com/konnectors/cozy-konnector-digiposte.git}",
-    "cozyPublish": "cozy-app-publish --token $REGISTRY_TOKEN --build-commit $(git rev-parse ${DEPLOY_BRANCH:-build})"
+  "keywords": [],
+  "author": "Cozy Cloud",
+  "license": "AGPL-3.0",
+  "main": "./src/index.js",
+  "eslintConfig": {
+    "extends": [
+      "eslint-config-cozy-app"
+    ]
   },
-  "author": "doubleface",
-  "license": "MIT",
+  "eslintIgnore": [
+    "build"
+  ],
+  "scripts": {
+    "start": "node ./index.js",
+    "dev": "cozy-run-dev",
+    "standalone": "cozy-run-standalone",
+    "test": "konitor testit .",
+    "check": "konitor check .",
+    "build": "webpack",
+    "precommit": "yarn lint",
+    "lint": "eslint --fix .",
+    "deploy": "git-directory-deploy --directory build/ --branch ${DEPLOY_BRANCH:-build} --repo=${DEPLOY_REPOSITORY:-https://$GITHUB_TOKEN@github.com/konnectors/cozy-konnector-digiposte.git}",
+    "cozyPublish": "cozy-app-publish --token $REGISTRY_TOKEN --build-commit $(git rev-parse ${DEPLOY_BRANCH:-build})",
+    "travisDeployKey": "./bin/generate_travis_deploy_key"
+  },
   "dependencies": {
-    "babel-loader": "^7.1.2",
+    "babel-loader": "7.1.2",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "bluebird": "^3.5.0",
-    "cozy-konnector-libs": "^3.0.3",
-    "date-fns": "^1.28.5"
+    "bluebird": "3.5.0",
+    "cozy-konnector-libs": "4.2.0",
+    "date-fns": "1.28.5"
   },
   "devDependencies": {
-    "babel-jest": "22.4.3",
     "babel-preset-es2015": "6.24.1",
     "copy-webpack-plugin": "4.5.1",
     "cozy-app-publish": "0.3.6",
+    "cozy-jobs-cli": "1.1.0",
+    "eslint": "4.19.1",
+    "eslint-config-cozy-app": "0.7.0",
     "git-directory-deploy": "1.5.1",
-    "jest": "22.4.3",
-    "webpack": "4.3.0",
-    "webpack-cli": "2.0.13"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "es6"
-    ]
+    "husky": "0.14.3",
+    "konitor": "0.8.2",
+    "webpack": "4.8.1",
+    "webpack-cli": "2.1.3"
   }
 }
