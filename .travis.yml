@@ -3,27 +3,40 @@ node_js:
 - '8'
 env:
   global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-digiposte.git"
   # REGISTRY_TOKEN
   - secure: JfJLDQE5OxOFDN0WsyAdmJOFXcfwo0g9Nul+clx+PhnremTb6zkv/gaX8n40QLQcYaAT2/i9zvqIy1a5g9S8hJB2+3UWA3UmX5X16Mf0jToT49NJWCyGnpKZM8gT1xQF6OusT04lr/LAWws0RU/pH7eltaOXaMGtzDBNsBodgJkSHLVfgM5cEcf5Y7aAbjLr+LpouzSmJgxCoOA9ou0kMwguOwl3zUNT/j0+I9bumjYVnk4fexO4dl6xPB2uBlp0NTMsW2iAk7XlzXdhT8AFQq+50PreuDNG2iMiTnfGLLljK3REJIfolYvB3hqMWH4TAqgIeodjSFKlUn3vyVOXiSNTSV4O37xF6SqWvDtv9jW0QqUhyTblGFvLQ1mg5HzwH154PHz2LDYqwBg5G0RdxzWftIixB+zzndF/A8wrTL1CPbKkV+XVs2hFZnHOZYPVVD0F3lp6OCXnXEO/A0a9tD0hE8Mxd6Bl+cvJsveY+31nhsEgZKoNfeZrItq4El9enLBOgTkHV0SzcEZOXpydqyUGFsBkDXiCqiLC5xkqR6RArcn12ekjKN5vTcqYdW1lZEE+OH5vhtsw36IWyxD9H5e0rlE6NO+7xv/aRLUwofVww3nozgnA5EC8ngslt1/vTNldp9O3p6imi7A8f2M3dTzlWSchJVffkPHl6tE4npg=
-  # CPatchane GITHUB_TOKEN  
+  # CPatchane GITHUB_TOKEN
   - secure: mb+7TjkFJG9dSCS5C5IW9dQ1nwwZOnJ1a7EKm7iRR4EBkF6zMEDRmYT8SNVN1C2wWRW2crzzSwDXroYepHeKlMLLfEbn29ou0zmghcRLsCQyYTCZZobIw26xbGS6cex+WXUbeyfsrcO8825X+UQdnWpYb1uRoHEpCGkEEE2mZw2V4v1a3koQIaJdKDB7/Zn7sXa8TWPH+D/bhG3CDbiki3Ebd9fwRUmUH1UTWJIhZHeL2F6iaJjZDzy8+ncKFy+ERQUlNBgj8oTcG5T9vxFwSohIdR3sYzXpp7JgV/KEz1FzNR3g0E/t4o67d2V9vTEzzHrbJcnEtMzJ4/vzC74U04c9G7o7w5dksbipeYGTGXbDlx9qqO8m/wMQzGz9G93p4YjO6sINBxTRoWub5eJ0ve4xLP+0cduN2yX7pNiW4tP+yQcGjFb54mKn6MCTweZWEAah6YgvejCquxaCoZVKg6YOC9FLho+wlRseXKedDMbS0WVszbUri1DnFBG/naMNO/FR+iYVI7E4Ta92JmeBMioswuHgPkCPi54KbqlUhhAptsPl51+aPBEEItumq0aPKcIOypcv/ynr/7QrxIlQtIYC96UPcl7GiQAj4kX5UkqhTUU6FxHL3Jm9G3kGIDaDqV71gsdrV0kpXBr09U7CONaUD0J376/o5F1avrWdwfM=
 cache:
   yarn: true
   directories:
   - node_modules
 script:
-- yarn test
+- yarn lint
 - yarn build
 deploy:
 - provider: script
-  repo: konnectors/cozy-konnector-digiposte
   skip-cleanup: true
-  script: DEPLOY_BRANCH=build && yarn deploy && yarn cozyPublish
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
   on:
     branch: master
 - provider: script
-  repo: konnectors/cozy-konnector-digiposte
   skip-cleanup: true
-  script: DEPLOY_BRANCH=build && yarn deploy && yarn cozyPublish
+  script: DEPLOY_BRANCH=latest yarn deploy
+  on:
+    branch: prod
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
   on:
     tags: true
+before_install:
+# run the yarn travisDeployKey command to genrate this
+# - openssl aes-256-cbc -K $encrypted_0b21ecdcf920_key -iv $encrypted_0b21ecdcf920_iv
+#   -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key

@@ -5,7 +5,7 @@
   "language": "node",
   "icon": "digiposte.svg",
   "slug": "digiposte",
-  "source": "git://github.com/cozy/cozy-konnector-digiposte.git#build",
+  "source": "git://github.com/konnectors/cozy-konnector-digiposte.git#build",
   "editor": "Cozy",
   "vendor_link": "https://secure.digiposte.fr",
   "categories": ["other"],
@@ -43,10 +43,10 @@
     }
   },
   "developer": {
-    "name": "Cozy Cloud",
+    "name": "Cozy",
     "url": "https://cozy.io"
   },
-  "langs": ["fr"],
+  "langs": ["fr", "en"],
   "locales": {
     "fr": {
       "short_description": "Récupérer vos données Digiposte dans votre Cozy",

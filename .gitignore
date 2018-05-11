@@ -2,6 +2,7 @@
 .account
 .token.json
 konnector-dev-config.json*
+fixtures/*
 
 # Coverage
 coverage/
@@ -28,6 +29,7 @@ desktop.ini
 # Editors / IDEs
 .floo
 .flooignore
+.idea/
 
 # Default
 # /!\ KEEP THIS SECTION THE LAST ONE
