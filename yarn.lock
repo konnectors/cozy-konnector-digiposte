@@ -1311,9 +1311,9 @@ cozy-jobs-cli@1.4.4:
     regenerator-runtime "^0.12.0"
     replay "2.3.0"
 
-cozy-konnector-libs@4.5.3:
-  version "4.5.3"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.5.3.tgz#b6a1fab88fb7ed6338ce42a2162f8dfba8ecb83e"
+cozy-konnector-libs@4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.6.1.tgz#05f529fd394a74ea3701e6020fc34b813d84a4e3"
   dependencies:
     bluebird "3.5.1"
     bluebird-retry "0.11.0"
@@ -1325,12 +1325,12 @@ cozy-konnector-libs@4.5.3:
     geco "0.11.1"
     lodash "4.17.10"
     moment "2.22.2"
-    pdfjs "2.0.0-alpha.8"
-    raven "2.6.2"
+    pdfjs "2.0.0"
+    raven "2.6.3"
     request "2.87.0"
     request-debug "0.2.0"
     request-promise "4.2.2"
-    uuid "3.2.1"
+    uuid "3.3.2"
 
 cozy-konnector-libs@^4.6.1:
   version "4.6.1"
