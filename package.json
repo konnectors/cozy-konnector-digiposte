@@ -37,7 +37,7 @@
     "date-fns": "1.29.0"
   },
   "devDependencies": {
-    "babel-loader": "7.1.4",
+    "babel-loader": "7.1.5",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "copy-webpack-plugin": "4.5.2",
     "cozy-app-publish": "0.3.6",
