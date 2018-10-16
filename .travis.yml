@@ -1,0 +1,41 @@
+language: node_js
+node_js:
+- '8'
+env:
+  global:
+  - GH_USER_EMAIL="travis@example.org"
+  - GH_USER_NAME="cozy-bot"
+  - DEPLOY_REPOSITORY="git@github.com:konnectors/cozy-konnector-digiposte.git"
+  - secure: jHIz2l9a4v8mTM52kPTmJNmPIrpjTj6zOU09k3CH3clgYGp1ZaUGKdqrSsTmGIRNlrW9o29AIAyTUSQXHXJ0xIC5GpFZaN6yQyr05PGkgIGaOXUO2aAsl7jmIHDxYDoH0giT0EDY5IWEQ4+rsXhy8gQRR6jI87o0y72ayINBD3S9OIjJ8BIX3IatUYnc2okV0L+bd3P31jgflv6qS/PHJbFHiDHQWba21maU4Wr4rsa4gQgKy7g+OUgcSXKDCey246ATErWdncRTTZWUVxbJ7phb7VqQx/6CsGk+GejZEJYX1ytCDfBis3ZMqa49+srmdM/QRCN1vGzkz7Qf17bl0t9OLun6xwi2s0Q0YUJIfFjYrgAO0YrXOFQkgFDLNkwLDacDF24794MEheP/qb3SSBbXYrUqDsazGMpwZKIBrjL7BOhRoJ9/02GPQoAZpgUWPdfCJ2soSgAYbXXL9OF1dCZLFKWMObOPJlJioAtutUhZQWbpR/jl3rEdUgOAGgT/lTQF1cpIxj+XqEikLTnBgH2EUU7NYRrj/8Xc+i1NlZk6r44L9L0i6vJqBnhifaRqTIkQ0Kx7CoG7iYpXEdlXCPDsCeooVSTmYxn1NMSkwm8hVxjHR75YpKPrsIcc9SHRRimz9TSt5ZOC1fNdNmoB7ILTDu16YIvxzHGhl50zaZY=
+cache:
+  yarn: true
+  directories:
+  - node_modules
+branches:
+  except:
+  - build
+  - build-debug
+script:
+- yarn lint
+- yarn build
+# - yarn run check
+deploy:
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    branch: master
+- provider: script
+  skip-cleanup: true
+  script: DEPLOY_BRANCH=build yarn deploy && yarn cozyPublish
+  on:
+    tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_38dfeae23772_key -iv $encrypted_38dfeae23772_iv
+  -in github_deploy_key.enc -out /tmp/github_deploy_key -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/github_deploy_key
+- ssh-add /tmp/github_deploy_key
+after_deploy:
+- rm /tmp/github_deploy_key
+- ssh-add -D

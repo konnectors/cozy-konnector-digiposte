@@ -1,11 +1,11 @@
 {
-  "version": "1.0.3",
+  "version": "1.1.0",
   "name": "Digiposte",
   "type": "konnector",
   "language": "node",
   "icon": "digiposte.svg",
   "slug": "digiposte",
-  "source": "git://github.com/konnectors/cozy-konnector-digiposte.git#build",
+  "source": "git://github.com/konnectors/cozy-konnector-digiposte.git",
   "editor": "Cozy",
   "vendor_link": "https://secure.digiposte.fr",
   "categories": ["other"],
@@ -56,5 +56,6 @@
       "short_description": "Fetch your Digiposte data in your Cozy",
       "long_description": "This provider will allow you to fetch all your Digiposte documents in your Cozy."
     }
-  }
+  },
+  "manifest_version": "2"
 }
