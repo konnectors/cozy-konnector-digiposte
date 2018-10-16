@@ -3,9 +3,7 @@
 .token.json
 konnector-dev-config.json*
 fixtures/*
-
-# Coverage
-coverage/
+data/*
 
 # NPM
 node_modules/

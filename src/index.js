@@ -22,9 +22,7 @@ request = requestFactory({
 let xsrfToken = null
 let accessToken = null
 
-module.exports = new BaseKonnector(function(fields) {
-  return fetchBills.bind(this)(fields)
-})
+module.exports = new BaseKonnector(fetchBills)
 
 function fetchBills(requiredFields) {
   return request('https://secure.digiposte.fr/identification-plus')
@@ -88,7 +86,11 @@ function fetchBills(requiredFields) {
     .then(() => {
       // Now get the access token
       log('info', 'Getting the app access token')
-      request = requestFactory()
+      request = requestFactory({
+        json: true,
+        cheerio: false,
+        jar: j
+      })
       request = request.defaults({
         headers: {
           'X-XSRF-TOKEN': xsrfToken
