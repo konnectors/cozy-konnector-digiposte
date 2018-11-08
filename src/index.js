@@ -1,4 +1,6 @@
-'use strict'
+process.env.SENTRY_DSN =
+  process.env.SENTRY_DSN ||
+  'https://f6f64db44c394bb3856d0198732634bf@sentry.cozycloud.cc/95'
 
 const {
   BaseKonnector,
