@@ -11,8 +11,7 @@ const {
   errors
 } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
-const fulltimeout = Date.now() + 3 * 60 * 1000
-const bb = require('bluebird')
+const fulltimeout = Date.now() + 4 * 60 * 1000
 let request = requestFactory()
 const j = request.jar()
 request = requestFactory({
@@ -26,97 +25,83 @@ let accessToken = null
 
 module.exports = new BaseKonnector(fetchBills)
 
-function fetchBills(requiredFields) {
-  return request('https://secure.digiposte.fr/identification-plus')
-    .then($ => {
-      // getting the login token in the login form
-      const loginToken = $('#credentials_recover_account__token').val()
-      if (loginToken === undefined) {
-        throw new Error('Could not get the login token')
-      }
-      return loginToken
-    })
-    .then(loginToken => {
-      log('info', `The login token is ${loginToken}`)
-      // now posting login requestFactory
-      return request({
-        uri: 'https://secure.digiposte.fr/login_check',
-        qs: {
-          isLoginPlus: 1
-        },
-        method: 'POST',
-        form: {
-          'login_plus[userType]': 'part',
-          'login_plus[login]': requiredFields.email,
-          'login_plus[input]': requiredFields.password,
-          'login_plus[registrationId]': '',
-          'login_plus[trustedContactId]': '',
-          'login_plus[tokenCustomization]': '',
-          'login_plus[isLoginPlus]': 1,
-          'login_plus[_token]': loginToken
-        }
-      })
-    })
-    .then($ => {
-      if ($('#infoQuestion').length) {
-        log(
-          'warn',
-          $('.dgplusContainer')
-            .text()
-            .trim()
-        )
-        return this.terminate(errors.USER_ACTION_NEEDED)
-      }
+async function fetchBills(requiredFields) {
+  let $ = await request('https://secure.digiposte.fr/identification-plus')
+  // getting the login token in the login form
+  const loginToken = $('#credentials_recover_account__token').val()
+  if (loginToken === undefined) {
+    throw new Error('Could not get the login token')
+  }
+  log('debug', `The login token is ${loginToken}`)
+  // now posting login requestFactory
+  $ = await request.post('https://secure.digiposte.fr/login_check', {
+    qs: {
+      isLoginPlus: 1
+    },
+    form: {
+      'login_plus[userType]': 'part',
+      'login_plus[login]': requiredFields.email,
+      'login_plus[input]': requiredFields.password,
+      'login_plus[registrationId]': '',
+      'login_plus[trustedContactId]': '',
+      'login_plus[tokenCustomization]': '',
+      'login_plus[isLoginPlus]': 1,
+      'login_plus[_token]': loginToken
+    }
+  })
+  if ($('#infoQuestion').length) {
+    log(
+      'warn',
+      $('.dgplusContainer')
+        .text()
+        .trim()
+    )
+    throw new Error(errors.USER_ACTION_NEEDED)
+  }
 
-      // read the XSRF-TOKEN in the cookie jar and add it in the header
-      log('info', 'Getting the XSRF token')
-      const xsrfcookie = j
-        .getCookies('https://secure.digiposte.fr/login_check')
-        .find(cookie => cookie.key === 'XSRF-TOKEN')
+  // read the XSRF-TOKEN in the cookie jar and add it in the header
+  log('info', 'Getting the XSRF token')
+  const xsrfcookie = j
+    .getCookies('https://secure.digiposte.fr/login_check')
+    .find(cookie => cookie.key === 'XSRF-TOKEN')
 
-      // if no xsrf token is found, then we have bad credential
-      if (xsrfcookie) {
-        xsrfToken = xsrfcookie.value
-        log('info', 'Successfully logged in')
-      } else throw new Error('LOGIN_FAILED')
+  // if no xsrf token is found, then we have bad credential
+  if (xsrfcookie) {
+    xsrfToken = xsrfcookie.value
+    log('info', 'Successfully logged in')
+  } else throw new Error('LOGIN_FAILED')
 
-      xsrfToken = xsrfcookie.value
-      log('info', 'XSRF token is ' + xsrfToken)
-      if (xsrfcookie) return xsrfToken
-      else throw new Error('Problem fetching the xsrf-token')
-    })
-    .then(() => {
-      // Now get the access token
-      log('info', 'Getting the app access token')
-      request = requestFactory({
-        json: true,
-        cheerio: false,
-        jar: j
-      })
-      request = request.defaults({
-        headers: {
-          'X-XSRF-TOKEN': xsrfToken
-        }
-      })
-      return request('https://secure.digiposte.fr/rest/security/tokens')
-    })
-    .then(body => {
-      if (body && body.access_token) {
-        accessToken = body.access_token
-        return accessToken
-      } else throw new Error('Problem fetching the access token')
-    })
-    .then(() => {
-      // Now get the list of folders
-      log('info', 'Getting the list of folders')
-      request = request.defaults({
-        auth: {
-          bearer: accessToken
-        }
-      })
-      return request('https://secure.digiposte.fr/api/v3/folders/safe')
-    })
-    .then(body => fetchFolder(body, requiredFields.folderPath, fulltimeout))
+  xsrfToken = xsrfcookie.value
+  log('debug', 'XSRF token is ' + xsrfToken)
+  if (!xsrfcookie) throw new Error('Problem fetching the xsrf-token')
+
+  // Now get the access token
+  log('info', 'Getting the app access token')
+  request = requestFactory({
+    json: true,
+    cheerio: false,
+    jar: j
+  })
+  request = request.defaults({
+    headers: {
+      'X-XSRF-TOKEN': xsrfToken
+    }
+  })
+  let body = await request('https://secure.digiposte.fr/rest/security/tokens')
+  if (body && body.access_token) {
+    accessToken = body.access_token
+  } else throw new Error('Problem fetching the access token')
+
+  // Now get the list of folders
+  log('info', 'Getting the list of folders')
+  request = request.defaults({
+    auth: {
+      bearer: accessToken
+    }
+  })
+
+  body = await request('https://secure.digiposte.fr/api/v3/folders/safe')
+  return fetchFolder(body, requiredFields.folderPath, fulltimeout)
 }
 
 // create a folder if it does not already exist
@@ -137,26 +122,26 @@ function sanitizeFolderName(foldername) {
   return foldername.replace(/^\.+$/, '').replace(/[/?<>\\:*|":]/g, '')
 }
 
-function fetchFolder(body, rootPath, timeout) {
+async function fetchFolder(body, rootPath, timeout) {
   // Then, for each folder, get the logo, list of files : name, url, amount, date
   body.folders = body.folders || []
-  let foldernames = body.folders.map(folder => folder.name)
-  log('debug', foldernames, 'List of folders')
   log('info', 'Getting the list of documents for each folder')
+  log('info', `TIMEOUT in ${Math.floor((timeout - Date.now()) / 1000)}s`)
 
   // If this is the root folder, also fetch it's documents
   if (!body.name) body.folders.unshift({ id: '', name: '' })
 
-  return bb
-    .mapSeries(body.folders, folder => {
-      let result = {
-        id: folder.id,
-        name: folder.name,
-        folders: folder.folders
-      }
-      log('info', folder.name + '...')
-      return request({
-        uri: 'https://secure.digiposte.fr/api/v3/documents/search',
+  let folders = []
+  for (let folder of body.folders) {
+    let result = {
+      id: folder.id,
+      name: folder.name,
+      folders: folder.folders
+    }
+    log('info', folder.name + '...')
+    folder = await request.post(
+      'https://secure.digiposte.fr/api/v3/documents/search',
+      {
         qs: {
           direction: 'DESCENDING',
           max_results: 100,
@@ -165,47 +150,59 @@ function fetchFolder(body, rootPath, timeout) {
         body: {
           folder_id: result.id,
           locations: ['SAFE', 'INBOX']
-        },
-        method: 'POST'
-      }).then(folder => {
-        result.docs = folder.documents.map(doc => ({
-          docid: doc.id,
-          type: doc.category,
-          fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
-          filename: getFileName(doc),
-          vendor: doc.sender_name,
-          requestOptions: {
-            method: 'POST',
-            jar: j,
-            form: {
-              'document_ids[]': doc.id
-            }
-          }
-        }))
-        log('info', '' + result.docs.length + ' document(s)')
-        return result
+        }
+      }
+    )
+    result.docs = folder.documents.map(doc => ({
+      docid: doc.id,
+      type: doc.category,
+      fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
+      filename: getFileName(doc),
+      vendor: doc.sender_name,
+      requestOptions: {
+        method: 'POST',
+        jar: j,
+        form: {
+          'document_ids[]': doc.id
+        }
+      }
+    }))
+    if (result && result.docs) {
+      log('info', '' + result.docs.length + ' document(s)')
+    }
+    folders.push(result)
+  }
+
+  // sort the folders by the number of documents
+  folders.sort((a, b) => {
+    return a.docs.length > b.docs.length ? 1 : -1
+  })
+
+  let index = 0
+  for (let folder of folders) {
+    const now = Date.now()
+    const remainingTime = timeout - now
+    const timeForThisFolder = remainingTime / (folders.length - index)
+    index++
+    log('info', 'Getting vendor ' + folder.name)
+    log('info', `Remaining time : ${Math.floor(remainingTime / 1000)}s`)
+    log(
+      'info',
+      `Time for this folder : ${Math.floor(timeForThisFolder / 1000)}s`
+    )
+    await mkdirp(rootPath, folder.name)
+    if (folder.docs) {
+      await saveFiles(folder.docs, `${rootPath}/${folder.name}`, {
+        timeout: now + timeForThisFolder
       })
-    })
-    .then(folders => {
-      return bb.each(folders, (folder, index, length) => {
-        const remainingTime = timeout - Date.now()
-        const timeForThisFolder = remainingTime / (length - index)
-        log('info', 'Getting vendor ' + folder.name)
-        return mkdirp(rootPath, folder.name)
-          .then(() =>
-            saveFiles(folder.docs, `${rootPath}/${folder.name}`, {
-              timeout: Date.now() + timeForThisFolder
-            })
-          )
-          .then(() => {
-            if (folder.name !== '') {
-              return fetchFolder(
-                folder,
-                `${rootPath}/${sanitizeFolderName(folder.name)}`,
-                Date.now() + timeForThisFolder
-              )
-            }
-          })
-      })
-    })
+    }
+
+    if (folder.name !== '') {
+      await fetchFolder(
+        folder,
+        `${rootPath}/${sanitizeFolderName(folder.name)}`,
+        now + timeForThisFolder
+      )
+    }
+  }
 }
