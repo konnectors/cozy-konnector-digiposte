@@ -48,6 +48,6 @@
     "konitor": "0.10.1",
     "svgo": "1.1.1",
     "webpack": "4.29.1",
-    "webpack-cli": "3.2.1"
+    "webpack-cli": "3.2.3"
   }
 }
