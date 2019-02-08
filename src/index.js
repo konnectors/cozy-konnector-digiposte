@@ -101,7 +101,7 @@ async function fetchBills(requiredFields) {
   })
 
   body = await request('https://secure.digiposte.fr/api/v3/folders/safe')
-  return fetchFolder(body, requiredFields.folderPath, fulltimeout)
+  return fetchFolder(body, requiredFields.folderPath, fulltimeout, requiredFields.password)
 }
 
 // create a folder if it does not already exist
@@ -122,7 +122,7 @@ function sanitizeFolderName(foldername) {
   return foldername.replace(/^\.+$/, '').replace(/[/?<>\\:*|":]/g, '')
 }
 
-async function fetchFolder(body, rootPath, timeout) {
+async function fetchFolder(body, rootPath, timeout, password) {
   // Then, for each folder, get the logo, list of files : name, url, amount, date
   body.folders = body.folders || []
   log('info', 'Getting the list of documents for each folder')
@@ -139,9 +139,28 @@ async function fetchFolder(body, rootPath, timeout) {
       folders: folder.folders
     }
     log('info', folder.name + '...')
+
+    //* Trying to retreive Health-token with the user's password (to allow health documents to be downloadable)
+    let healthToken
+    await request({
+      url: 'https://secure.digiposte.fr/rest/security/health-token',
+      method: 'POST',
+      headers: {
+        'X-XSRF-TOKEN': xsrfToken
+      },
+      form: {
+        "password": password //* need password again
+      }
+    }, (error, response, body) => {
+      healthToken = JSON.parse(body).access_token
+    })
+
     folder = await request.post(
       'https://secure.digiposte.fr/api/v3/documents/search',
       {
+        headers: {
+          'Authorization': `Bearer ${healthToken}` //* Need the new token here (health-token)
+        },
         qs: {
           direction: 'DESCENDING',
           max_results: 100,
@@ -153,7 +172,8 @@ async function fetchFolder(body, rootPath, timeout) {
         }
       }
     )
-    result.docs = folder.documents.map(doc => ({
+    result.docs = folder.documents.map(doc => ({ 
+      //* If you need : doc.health_document is a bool to know if the document is a health document or not
       docid: doc.id,
       type: doc.category,
       fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
