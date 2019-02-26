@@ -2,6 +2,7 @@ process.env.SENTRY_DSN =
   process.env.SENTRY_DSN ||
   'https://f6f64db44c394bb3856d0198732634bf@sentry.cozycloud.cc/95'
 
+const cheerio = require('cheerio')
 const {
   BaseKonnector,
   log,
@@ -15,6 +16,7 @@ const fulltimeout = Date.now() + 4 * 60 * 1000
 let request = requestFactory()
 const j = request.jar()
 request = requestFactory({
+  //debug: true,
   cheerio: true,
   json: false,
   jar: j
@@ -22,19 +24,39 @@ request = requestFactory({
 
 let xsrfToken = null
 let accessToken = null
+let healthToken = null
 
-module.exports = new BaseKonnector(fetchBills)
+module.exports = new BaseKonnector(fetch)
 
-async function fetchBills(requiredFields) {
+async function fetch(requiredFields) {
+  // Login and fetch multiples tokens
+  await login(requiredFields)
+  await fetchTokens(requiredFields.password)
+  request = request.defaults({
+    auth: {
+      bearer: accessToken
+    }
+  })
+  // Now get the list of folders
+  log('info', 'Getting the list of folders')
+  const folders = await request(
+    'https://secure.digiposte.fr/api/v3/folders/safe'
+  )
+  return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
+}
+
+async function login(requiredFields) {
   let $ = await request('https://secure.digiposte.fr/identification-plus')
   // getting the login token in the login form
   const loginToken = $('#credentials_recover_account__token').val()
-  if (loginToken === undefined) {
-    throw new Error('Could not get the login token')
+  if (!loginToken) {
+    log('error', 'Could not get the login token')
+    throw new Error(errors.VENDOR_DOWN)
   }
   log('debug', `The login token is ${loginToken}`)
   // now posting login requestFactory
-  $ = await request.post('https://secure.digiposte.fr/login_check', {
+  const resp = await request.post('https://secure.digiposte.fr/login_check', {
+    resolveWithFullResponse: true,
     qs: {
       isLoginPlus: 1
     },
@@ -49,6 +71,9 @@ async function fetchBills(requiredFields) {
       'login_plus[_token]': loginToken
     }
   })
+
+  // Possible account lock detection, unkown status at 02-2019
+  $ = cheerio.load(resp)
   if ($('#infoQuestion').length) {
     log(
       'warn',
@@ -59,27 +84,45 @@ async function fetchBills(requiredFields) {
     throw new Error(errors.USER_ACTION_NEEDED)
   }
 
-  // read the XSRF-TOKEN in the cookie jar and add it in the header
-  log('info', 'Getting the XSRF token')
-  const xsrfcookie = j
-    .getCookies('https://secure.digiposte.fr/login_check')
+  // Checking where we are redirected and strictly login_failed
+  if (resp.request.uri.href === 'https://secure.digiposte.fr/') {
+    log('info', 'Login succeed, we are redirected to main user page')
+  } else if (
+    resp.request.uri.href ===
+    'https://secure.digiposte.fr/identification-plus/digiposte-plus'
+  ) {
+    log('error', 'Login Failed, we are redirected to login page')
+    throw new Error(errors.LOGIN_FAILED)
+  } else {
+    log('error', 'Unkown issue at login')
+    throw new Error(errors.VENDOR_DOWN)
+  }
+}
+
+// Read the XSRF-TOKEN in the cookie jar and set it globably
+async function extractXsrfToken() {
+  log('info', 'Getting the XSRF token for cookie jar')
+  let xsrfcookie = j
+    .getCookies('https://secure.digiposte.fr/')
     .find(cookie => cookie.key === 'XSRF-TOKEN')
 
-  // if no xsrf token is found, then we have bad credential
-  if (xsrfcookie) {
-    xsrfToken = xsrfcookie.value
-    log('info', 'Successfully logged in')
-  } else throw new Error('LOGIN_FAILED')
-
+  if (!xsrfcookie) {
+    log('error', 'Problem fetching the xsrf-token')
+    throw new Error(errors.VENDOR_DOWN)
+  }
   xsrfToken = xsrfcookie.value
-  log('debug', 'XSRF token is ' + xsrfToken)
-  if (!xsrfcookie) throw new Error('Problem fetching the xsrf-token')
+  log('debug', 'XSRF token is set to ' + xsrfToken)
+}
 
-  // Now get the access token
+async function fetchTokens(password) {
+  // Extract a first Xsrf
+  extractXsrfToken()
+
+  // Get the access token
   log('info', 'Getting the app access token')
   request = requestFactory({
-    json: true,
     cheerio: false,
+    json: true,
     jar: j
   })
   request = request.defaults({
@@ -90,18 +133,36 @@ async function fetchBills(requiredFields) {
   let body = await request('https://secure.digiposte.fr/rest/security/tokens')
   if (body && body.access_token) {
     accessToken = body.access_token
-  } else throw new Error('Problem fetching the access token')
+  } else {
+    log('error', 'Problem fetching the access token')
+    throw new Error(errors.VENDOR_DOWN)
+  }
 
-  // Now get the list of folders
-  log('info', 'Getting the list of folders')
+  // Requesting healthToken with password
+  log('info', `Getting the health-token`)
+  await request(
+    {
+      url: 'https://secure.digiposte.fr/rest/security/health-token',
+      method: 'POST',
+      headers: {
+        accept: 'application/json, text/plain, */*'
+      },
+      json: {
+        password: password // need password again here
+      }
+    },
+    (error, response, body) => {
+      healthToken = body.access_token
+    }
+  )
+
+  // Extract a second Xsrf as it changed
+  extractXsrfToken()
   request = request.defaults({
-    auth: {
-      bearer: accessToken
+    headers: {
+      'X-XSRF-TOKEN': xsrfToken
     }
   })
-
-  body = await request('https://secure.digiposte.fr/api/v3/folders/safe')
-  return fetchFolder(body, requiredFields.folderPath, fulltimeout, requiredFields.password)
 }
 
 // create a folder if it does not already exist
@@ -122,7 +183,7 @@ function sanitizeFolderName(foldername) {
   return foldername.replace(/^\.+$/, '').replace(/[/?<>\\:*|":]/g, '')
 }
 
-async function fetchFolder(body, rootPath, timeout, password) {
+async function fetchFolder(body, rootPath, timeout) {
   // Then, for each folder, get the logo, list of files : name, url, amount, date
   body.folders = body.folders || []
   log('info', 'Getting the list of documents for each folder')
@@ -138,28 +199,12 @@ async function fetchFolder(body, rootPath, timeout, password) {
       name: folder.name,
       folders: folder.folders
     }
-    log('info', folder.name + '...')
-
-    //* Trying to retreive Health-token with the user's password (to allow health documents to be downloadable)
-    let healthToken
-    await request({
-      url: 'https://secure.digiposte.fr/rest/security/health-token',
-      method: 'POST',
-      headers: {
-        'X-XSRF-TOKEN': xsrfToken
-      },
-      form: {
-        "password": password //* need password again
-      }
-    }, (error, response, body) => {
-      healthToken = JSON.parse(body).access_token
-    })
-
+    log('info', (folder.name || 'root_dir') + '...')
     folder = await request.post(
       'https://secure.digiposte.fr/api/v3/documents/search',
       {
         headers: {
-          'Authorization': `Bearer ${healthToken}` //* Need the new token here (health-token)
+          Authorization: `Bearer ${healthToken}` //* Need the health-token here
         },
         qs: {
           direction: 'DESCENDING',
@@ -172,7 +217,7 @@ async function fetchFolder(body, rootPath, timeout, password) {
         }
       }
     )
-    result.docs = folder.documents.map(doc => ({ 
+    result.docs = folder.documents.map(doc => ({
       //* If you need : doc.health_document is a bool to know if the document is a health document or not
       docid: doc.id,
       type: doc.category,
