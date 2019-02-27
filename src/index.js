@@ -217,25 +217,28 @@ async function fetchFolder(body, rootPath, timeout) {
         }
       }
     )
-    // doc.health_document is a bool and is used to replace file each time if true
-    const shouldReplaceFile = doc => {
-      return doc.health_document
-    }
-    result.docs = folder.documents.map(doc => ({
-      shouldReplaceFile,
-      docid: doc.id,
-      type: doc.category,
-      fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
-      filename: getFileName(doc),
-      vendor: doc.sender_name,
-      requestOptions: {
-        method: 'POST',
-        jar: j,
-        form: {
-          'document_ids[]': doc.id
+    result.docs = folder.documents.map(doc => {
+      let tmpDoc = {
+        docid: doc.id,
+        type: doc.category,
+        fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
+        filename: getFileName(doc),
+        vendor: doc.sender_name,
+        requestOptions: {
+          method: 'POST',
+          jar: j,
+          form: {
+            'document_ids[]': doc.id
+          }
         }
       }
-    }))
+      // doc.health_document is a bool and is used to replace file each time if true
+      if (doc.health_document === true) {
+        tmpDoc.shouldReplaceFile = () => true
+      }
+
+      return tmpDoc
+    })
     if (result && result.docs) {
       log('info', '' + result.docs.length + ' document(s)')
     }
