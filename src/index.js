@@ -217,8 +217,12 @@ async function fetchFolder(body, rootPath, timeout) {
         }
       }
     )
+    // doc.health_document is a bool and is used to replace file each time if true
+    const shouldReplaceFile = doc => {
+      return doc.health_document
+    }
     result.docs = folder.documents.map(doc => ({
-      //* If you need : doc.health_document is a bool to know if the document is a health document or not
+      shouldReplaceFile,
       docid: doc.id,
       type: doc.category,
       fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
