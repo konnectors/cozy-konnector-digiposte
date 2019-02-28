@@ -232,10 +232,6 @@ async function fetchFolder(body, rootPath, timeout) {
           }
         }
       }
-      // doc.health_document is a bool and is used to replace file each time if true
-      if (doc.health_document === true) {
-        tmpDoc.shouldReplaceFile = () => true
-      }
 
       return tmpDoc
     })
