@@ -1,6 +1,6 @@
 {
   "name": "cozy-konnector-digiposte",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Import your digiposte files",
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "travisDeployKey": "./bin/generate_travis_deploy_key"
   },
   "dependencies": {
-    "cozy-konnector-libs": "4.14.8",
+    "cozy-konnector-libs": "4.14.7",
     "date-fns": "1.30.1"
   },
   "devDependencies": {
