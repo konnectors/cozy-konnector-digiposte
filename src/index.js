@@ -217,21 +217,24 @@ async function fetchFolder(body, rootPath, timeout) {
         }
       }
     )
-    result.docs = folder.documents.map(doc => ({
-      //* If you need : doc.health_document is a bool to know if the document is a health document or not
-      docid: doc.id,
-      type: doc.category,
-      fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
-      filename: getFileName(doc),
-      vendor: doc.sender_name,
-      requestOptions: {
-        method: 'POST',
-        jar: j,
-        form: {
-          'document_ids[]': doc.id
+    result.docs = folder.documents.map(doc => {
+      let tmpDoc = {
+        docid: doc.id,
+        type: doc.category,
+        fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
+        filename: getFileName(doc),
+        vendor: doc.sender_name,
+        requestOptions: {
+          method: 'POST',
+          jar: j,
+          form: {
+            'document_ids[]': doc.id
+          }
         }
       }
-    }))
+
+      return tmpDoc
+    })
     if (result && result.docs) {
       log('info', '' + result.docs.length + ' document(s)')
     }
