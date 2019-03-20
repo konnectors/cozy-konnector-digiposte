@@ -5,7 +5,7 @@
   "language": "node",
   "icon": "digiposte.svg",
   "slug": "digiposte",
-  "source": "git://github.com/konnectors/cozy-konnector-digiposte.git",
+  "source": "git@github.com:konnectors/cozy-konnector-digiposte.git",
   "editor": "Cozy",
   "vendor_link": "https://secure.digiposte.fr",
   "categories": [
