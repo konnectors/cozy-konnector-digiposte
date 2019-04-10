@@ -602,15 +602,15 @@ bluebird-retry@0.11.0:
   resolved "https://registry.yarnpkg.com/bluebird-retry/-/bluebird-retry-0.11.0.tgz#1289ab22cbbc3a02587baad35595351dd0c1c047"
   integrity sha1-EomrIsu8OgJYe6rTVZU1HdDBwEc=
 
-bluebird@3.5.3, bluebird@^3.5.0, bluebird@^3.5.3:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
-  integrity sha512-/qKPUQlaW1OyR51WeCPBvRnAlnZFUJkCSG5HzGnuIqhgyJtF+T94lFnn33eiazjRm2LAHVy2guNnaq48X9SJuw==
-
 bluebird@3.5.4:
   version "3.5.4"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.4.tgz#d6cc661595de30d5b3af5fcedd3c0b3ef6ec5714"
   integrity sha512-FG+nFEZChJrbQ9tIccIfZJBz3J7mLrAhxakAbnrJWn8d7aKOC+LWifa0G+p4ZqKp4y13T7juYvdhq9NzKdsrjw==
+
+bluebird@^3.5.0, bluebird@^3.5.3:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
+  integrity sha512-/qKPUQlaW1OyR51WeCPBvRnAlnZFUJkCSG5HzGnuIqhgyJtF+T94lFnn33eiazjRm2LAHVy2guNnaq48X9SJuw==
 
 bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.1.1, bn.js@^4.4.0:
   version "4.11.8"
@@ -851,18 +851,6 @@ charenc@~0.0.1:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/charenc/-/charenc-0.0.2.tgz#c0a1d2f3a7092e03774bfa83f14c0fc5790a8667"
   integrity sha1-wKHS86cJLgN3S/qD8UwPxXkKhmc=
-
-cheerio@1.0.0-rc.2:
-  version "1.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/cheerio/-/cheerio-1.0.0-rc.2.tgz#4b9f53a81b27e4d5dac31c0ffd0cfa03cc6830db"
-  integrity sha1-S59TqBsn5NXawxwP/Qz6A8xoMNs=
-  dependencies:
-    css-select "~1.2.0"
-    dom-serializer "~0.1.0"
-    entities "~1.1.1"
-    htmlparser2 "^3.9.1"
-    lodash "^4.15.0"
-    parse5 "^3.0.1"
 
 cheerio@1.0.0-rc.3:
   version "1.0.0-rc.3"
@@ -1218,16 +1206,6 @@ cozy-client-js@0.15.1:
     pouchdb-browser "7.0.0"
     pouchdb-find "7.0.0"
 
-cozy-doctypes@1.38.6:
-  version "1.38.6"
-  resolved "https://registry.yarnpkg.com/cozy-doctypes/-/cozy-doctypes-1.38.6.tgz#7f797f25372a1589210d43f6df7f4eefef27b72a"
-  integrity sha512-ZKtq3SmqRtjDJH0y6EHf+4357BQCQoFjvy7/HriZuXL+TAlymY39FQtJ3Hyr/0vMoM9PFbRhwH9Z0JD9Tx4JJw==
-  dependencies:
-    "@babel/runtime" "7.3.1"
-    cozy-logger "1.3.1"
-    es6-promise-pool "2.5.0"
-    lodash "4.17.11"
-
 cozy-doctypes@1.39.0:
   version "1.39.0"
   resolved "https://registry.yarnpkg.com/cozy-doctypes/-/cozy-doctypes-1.39.0.tgz#edbd8b7575d858ce5305c0e7c6d14cf6c44b6d83"
@@ -1256,31 +1234,7 @@ cozy-jobs-cli@1.8.3:
     regenerator-runtime "0.13.2"
     replay "2.4.0"
 
-cozy-konnector-libs@4.15.2:
-  version "4.15.2"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.15.2.tgz#a9b81a326370142fa8e9f919a84e14e5c5babdae"
-  integrity sha512-AnyUwwyJcEWsLU3TBPyj53UakxTXB0EKRUT0gQcC1hopYHROP98EbdTKZ+hS8yAGu5/EeCU+XLfrI6o6t9Ezog==
-  dependencies:
-    bluebird "3.5.3"
-    bluebird-retry "0.11.0"
-    cheerio "1.0.0-rc.2"
-    classificator "0.3.3"
-    cozy-client-js "0.15.1"
-    cozy-doctypes "1.38.6"
-    cozy-logger "1.3.1"
-    date-fns "1.30.1"
-    geco "0.11.1"
-    lodash-id "0.14.0"
-    lowdb "1.0.0"
-    pdfjs "2.1.0"
-    pdfjs-dist "2.0.943"
-    raven "2.6.4"
-    raw-body "2.3.3"
-    request "2.88.0"
-    request-debug "0.2.0"
-    request-promise "4.2.4"
-
-cozy-konnector-libs@^4.15.3:
+cozy-konnector-libs@4.15.3, cozy-konnector-libs@^4.15.3:
   version "4.15.3"
   resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.15.3.tgz#6905787eb539d9b8fed67afe26d31fa80d411d33"
   integrity sha512-27LOAOvNb0QCFWqQQq7QRGmD+EsShi9NvSaGJaNO4CcdczsTLVWx5ZdIana0HHG1idnOrzrSHqGnnIZKLdJrog==
@@ -1636,7 +1590,7 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dom-serializer@0, dom-serializer@~0.1.0, dom-serializer@~0.1.1:
+dom-serializer@0, dom-serializer@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/dom-serializer/-/dom-serializer-0.1.1.tgz#1ec4059e284babed36eec2941d4a970a189ce7c0"
   integrity sha512-l0IU0pPzLWSHBcieZbpOKgkIn3ts3vAh7ZuFyXNwJxJXk/c4Gwj9xaTJwIDVQCXawWD0qb3IzMGH5rglQaO0XA==
