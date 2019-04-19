@@ -2,21 +2,21 @@ process.env.SENTRY_DSN =
   process.env.SENTRY_DSN ||
   'https://f6f64db44c394bb3856d0198732634bf@sentry.cozycloud.cc/95'
 
-const cheerio = require('cheerio')
 const {
   BaseKonnector,
   log,
   saveFiles,
   cozyClient,
   requestFactory,
-  errors
+  errors,
+  signin
 } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
 const fulltimeout = Date.now() + 4 * 60 * 1000
 let request = requestFactory()
 const j = request.jar()
 request = requestFactory({
-  //debug: true,
+  // debug: true,
   cheerio: true,
   json: false,
   jar: j
@@ -45,58 +45,27 @@ async function fetch(requiredFields) {
   return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
 }
 
-async function login(requiredFields) {
-  let $ = await request('https://secure.digiposte.fr/identification-plus')
-  // getting the login token in the login form
-  const loginToken = $('#credentials_recover_account__token').val()
-  if (!loginToken) {
-    log('error', 'Could not get the login token')
-    throw new Error(errors.VENDOR_DOWN)
-  }
-  log('debug', `The login token is ${loginToken}`)
-  // now posting login requestFactory
-  const resp = await request.post('https://secure.digiposte.fr/login_check', {
-    resolveWithFullResponse: true,
-    qs: {
-      isLoginPlus: 1
-    },
-    form: {
-      'login_plus[userType]': 'part',
-      'login_plus[login]': requiredFields.email,
-      'login_plus[input]': requiredFields.password,
-      'login_plus[registrationId]': '',
-      'login_plus[trustedContactId]': '',
-      'login_plus[tokenCustomization]': '',
-      'login_plus[isLoginPlus]': 1,
-      'login_plus[_token]': loginToken
+function login({ email, password }) {
+  return signin({
+    url: `https://secure.digiposte.fr/identification-plus`,
+    requestInstance: request,
+    formSelector: 'form',
+    formData: { _username: email, _password: password },
+    validate: (statusCode, $, fullResponse) => {
+      if (
+        fullResponse.request.uri.href ===
+        'https://compte.laposte.fr/fo/v1/login'
+      ) {
+        return false
+      } else if (
+        fullResponse.request.uri.href === 'https://secure.digiposte.fr/'
+      ) {
+        return true
+      } else {
+        throw new Error(errors.VENDOR_DOWN)
+      }
     }
   })
-
-  // Possible account lock detection, unkown status at 02-2019
-  $ = cheerio.load(resp)
-  if ($('#infoQuestion').length) {
-    log(
-      'warn',
-      $('.dgplusContainer')
-        .text()
-        .trim()
-    )
-    throw new Error(errors.USER_ACTION_NEEDED)
-  }
-
-  // Checking where we are redirected and strictly login_failed
-  if (resp.request.uri.href === 'https://secure.digiposte.fr/') {
-    log('info', 'Login succeed, we are redirected to main user page')
-  } else if (
-    resp.request.uri.href ===
-    'https://secure.digiposte.fr/identification-plus/digiposte-plus'
-  ) {
-    log('error', 'Login Failed, we are redirected to login page')
-    throw new Error(errors.LOGIN_FAILED)
-  } else {
-    log('error', 'Unkown issue at login')
-    throw new Error(errors.VENDOR_DOWN)
-  }
 }
 
 // Read the XSRF-TOKEN in the cookie jar and set it globably
