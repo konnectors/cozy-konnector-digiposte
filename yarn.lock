@@ -1217,10 +1217,10 @@ cozy-doctypes@1.39.0:
     es6-promise-pool "2.5.0"
     lodash "4.17.11"
 
-cozy-jobs-cli@1.8.5:
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/cozy-jobs-cli/-/cozy-jobs-cli-1.8.5.tgz#68c62d96aa0e3d687472aaf34c7699b206580880"
-  integrity sha512-QOf/z3+//0NmltS1WzpHPLP6+P//G64Gn3SAr5yPtKeCjXcvWKCM+eQnzum6tTTjsRFYoSLyYAFlo8psCZM+6Q==
+cozy-jobs-cli@1.8.6:
+  version "1.8.6"
+  resolved "https://registry.yarnpkg.com/cozy-jobs-cli/-/cozy-jobs-cli-1.8.6.tgz#a9b2aeb9660ce0fe2cc8082c2cb9be42be613942"
+  integrity sha512-VVp+H7Aaj+XpARVAj9m65ebsN9WDonMUqTtFgm8c7FvJQuIgNEam9ihy4kmF+llQgFr+12g+S7pBAR5NfiGEQw==
   dependencies:
     btoa "1.2.1"
     cheerio "1.0.0-rc.3"
@@ -1228,17 +1228,43 @@ cozy-jobs-cli@1.8.5:
     commander "2.20.0"
     core-js "3.0.1"
     cozy-client-js "0.15.1"
-    cozy-konnector-libs "^4.15.4"
+    cozy-konnector-libs "^4.15.5"
     cozy-logger "^1.3.1"
     opn "6.0.0"
     pretty "2.0.0"
     regenerator-runtime "0.13.2"
     replay "2.4.0"
 
-cozy-konnector-libs@4.15.4, cozy-konnector-libs@^4.15.4:
+cozy-konnector-libs@4.15.4:
   version "4.15.4"
   resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.15.4.tgz#9f30a6a81d7a123d14e445dcef96d09df1dd4855"
   integrity sha512-ssZon8aHvYPgpCxPLfFAeqfFvscefYrmDy2wyIWfT/nqElNWZMb2xKXDW0yr43gGZYl4Vz4u3uGJSf7K2uxInw==
+  dependencies:
+    bluebird "3.5.4"
+    bluebird-retry "0.11.0"
+    cheerio "1.0.0-rc.3"
+    classificator "0.3.3"
+    cozy-client-js "0.15.1"
+    cozy-doctypes "1.39.0"
+    cozy-logger "1.3.1"
+    date-fns "1.30.1"
+    file-type "10.11.0"
+    geco "0.11.1"
+    lodash-id "0.14.0"
+    lowdb "1.0.0"
+    mime-types "2.1.24"
+    pdfjs "2.1.0"
+    pdfjs-dist "2.0.943"
+    raven "2.6.4"
+    raw-body "2.4.0"
+    request "2.88.0"
+    request-debug "0.2.0"
+    request-promise "4.2.4"
+
+cozy-konnector-libs@^4.15.5:
+  version "4.15.5"
+  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.15.5.tgz#620b68030a1b8407453964e0c8e5ff1360b7e371"
+  integrity sha512-JgvqFjnqEr3YCVtPyCD3Kf9ndfnhvFl8FMPsZcAuMt8MfN+elbOO3EDfn+raYp5BF+Rwzv1utJbhPToU3ZDcQw==
   dependencies:
     bluebird "3.5.4"
     bluebird-retry "0.11.0"
