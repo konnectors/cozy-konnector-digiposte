@@ -229,9 +229,13 @@ async function fetchFolder(body, rootPath, timeout) {
     )
     await mkdirp(rootPath, folder.name)
     if (folder.docs) {
-      await saveFiles(folder.docs, `${rootPath}/${folder.name}`, {
-        timeout: now + timeForThisFolder
-      })
+      await saveFiles(
+        folder.docs,
+        `${rootPath}/${sanitizeFolderName(folder.name)}`,
+        {
+          timeout: now + timeForThisFolder
+        }
+      )
     }
 
     if (folder.name !== '') {
