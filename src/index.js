@@ -139,12 +139,19 @@ function mkdirp(path, folderName) {
   folderName = sanitizeFolderName(folderName)
   return cozyClient.files.statByPath(`${path}/${folderName}`).catch(err => {
     log('info', err.message, `${path} folder does not exist yet, creating it`)
-    return cozyClient.files.statByPath(`${path}`).then(parentFolder =>
-      cozyClient.files.createDirectory({
-        name: folderName,
-        dirID: parentFolder._id
+    return cozyClient.files
+      .statByPath(`${path}`)
+      .then(parentFolder =>
+        cozyClient.files.createDirectory({
+          name: folderName,
+          dirID: parentFolder._id
+        })
+      )
+      .catch(err => {
+        if (err.status !== 409) {
+          throw err
+        }
       })
-    )
   })
 }
 
