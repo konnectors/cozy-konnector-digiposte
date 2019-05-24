@@ -38,7 +38,7 @@
     "travisDeployKey": "./bin/generate_travis_deploy_key"
   },
   "dependencies": {
-    "bluebird": "3.5.4",
+    "bluebird": "3.5.5",
     "cozy-konnector-libs": "4.15.12",
     "date-fns": "1.30.1"
   },
