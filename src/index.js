@@ -127,6 +127,7 @@ async function fetchTokens(password) {
 
   // Extract a second Xsrf as it changed
   extractXsrfToken()
+  // eslint-disable-next-line require-atomic-updates
   request = request.defaults({
     headers: {
       'X-XSRF-TOKEN': xsrfToken
