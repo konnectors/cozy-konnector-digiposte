@@ -127,6 +127,7 @@ async function fetchTokens(password) {
 
   // Extract a second Xsrf as it changed
   extractXsrfToken()
+  // eslint-disable-next-line require-atomic-updates
   request = request.defaults({
     headers: {
       'X-XSRF-TOKEN': xsrfToken
@@ -209,6 +210,38 @@ async function fetchFolder(body, rootPath, timeout) {
         }
       }
 
+      // Orange payslip specific
+      if (doc.category === 'Bulletin de paie' && doc.author_name === 'Orange') {
+        const creationDateObj = new Date(doc.creation_date)
+        const nextMonthObj = new Date(
+          Date.UTC(
+            creationDateObj.getFullYear(),
+            creationDateObj.getMonth() + 1,
+            1
+          )
+        ) // First day of next month
+        const lastDayObj = new Date(
+          Date.UTC(nextMonthObj.getFullYear(), nextMonthObj.getMonth())
+        )
+        lastDayObj.setDate(0) // Set day before the first day of next month
+        tmpDoc.fileAttributes = {
+          metadata: {
+            classification: 'payslip',
+            datetime: doc.creation_date,
+            datetimeLabel: 'startDate',
+            contentAuthor: 'orange',
+            startDate: new Date(
+              Date.UTC(
+                creationDateObj.getFullYear(),
+                creationDateObj.getMonth(),
+                1
+              )
+            ).toISOString(), // First day of the month
+            endDate: lastDayObj.toISOString(),
+            issueDate: doc.creation_date
+          }
+        }
+      }
       return tmpDoc
     })
     if (result && result.docs) {
