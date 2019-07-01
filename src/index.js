@@ -224,19 +224,18 @@ async function fetchFolder(body, rootPath, timeout) {
           Date.UTC(nextMonthObj.getFullYear(), nextMonthObj.getMonth())
         )
         lastDayObj.setDate(0) // Set day before the first day of next month
+        // First day of the month
+        const firstDayStg = new Date(
+          Date.UTC(creationDateObj.getFullYear(), creationDateObj.getMonth(), 1)
+        ).toISOString()
+
         tmpDoc.fileAttributes = {
           metadata: {
             classification: 'payslip',
-            datetime: doc.creation_date,
+            datetime: firstDayStg,
             datetimeLabel: 'startDate',
             contentAuthor: 'orange',
-            startDate: new Date(
-              Date.UTC(
-                creationDateObj.getFullYear(),
-                creationDateObj.getMonth(),
-                1
-              )
-            ).toISOString(), // First day of the month
+            startDate: firstDayStg,
             endDate: lastDayObj.toISOString(),
             issueDate: doc.creation_date
           }
