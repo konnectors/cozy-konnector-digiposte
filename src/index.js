@@ -70,6 +70,11 @@ function login({ email, password }) {
         'https://secure.digiposte.fr/question-secret'
       ) {
         throw new Error(errors.USER_ACTION_NEEDED_CGU_FORM)
+      } else if (
+        fullResponse.request.uri.href ===
+        'https://compte.laposte.fr/fo/v1/checkpoint'
+      ) {
+        throw new Error('USER_ACTION_NEEDED.TWOFA_EXPIRED')
       } else {
         log('error', fullResponse.request.uri.href)
         throw new Error(errors.VENDOR_DOWN)
