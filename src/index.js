@@ -26,9 +26,13 @@ let xsrfToken = null
 let accessToken = null
 let healthToken = null
 
+let sourceAccount, sourceAccountIdentifier
+
 module.exports = new BaseKonnector(fetch)
 
 async function fetch(requiredFields) {
+  sourceAccount = this._account._id
+  sourceAccountIdentifier = requiredFields.email
   // Login and fetch multiples tokens
   await login(requiredFields)
   await fetchTokens(requiredFields.password)
@@ -278,7 +282,9 @@ async function fetchFolder(body, rootPath, timeout) {
         folder.docs,
         `${rootPath}/${sanitizeFolderName(folder.name)}`,
         {
-          timeout: now + timeForThisFolder
+          timeout: now + timeForThisFolder,
+          sourceAccount,
+          sourceAccountIdentifier
         }
       )
     }
