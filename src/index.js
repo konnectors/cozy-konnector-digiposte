@@ -61,7 +61,13 @@ function login({ email, password }) {
         fullResponse.request.uri.href === 'https://secure.digiposte.fr/'
       ) {
         return true
+      } else if (
+        fullResponse.request.uri.href ===
+        'https://secure.digiposte.fr/question-secret'
+      ) {
+        throw new Error(errors.USER_ACTION_NEEDED_CGU_FORM)
       } else {
+        log('error', fullResponse.request.uri.href)
         throw new Error(errors.VENDOR_DOWN)
       }
     }
