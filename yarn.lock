@@ -1211,10 +1211,10 @@ cosmiconfig@^5.2.1:
     js-yaml "^3.13.1"
     parse-json "^4.0.0"
 
-cozy-app-publish@0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/cozy-app-publish/-/cozy-app-publish-0.17.0.tgz#ddca248a413529b99befa052d7194e2214de447c"
-  integrity sha512-mqyIMEgmnRgj3nJ8CZn50xIGIHHwIdkH0hkq25peZeUoXI8QfoRm6PxLCe6XQ0l11CMjBf0uGcFcrzOh7sOmuQ==
+cozy-app-publish@0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/cozy-app-publish/-/cozy-app-publish-0.18.0.tgz#f30d5058cd0e6a6455287b51680e0039ae8e995e"
+  integrity sha512-Bd0HLd5xLr2pJ2SZNw/M+ORtKX54N90Gg2n9CxPm4HElwhnyrVT8ceevXHkt7GDLkyjt1RFtOZifbS5hMX8DaQ==
   dependencies:
     argparse "^1.0.10"
     chalk "2.4.2"
@@ -1270,10 +1270,10 @@ cozy-doctypes@1.61.0:
     lodash "4.17.15"
     prop-types "^15.7.2"
 
-cozy-jobs-cli@1.9.3:
-  version "1.9.3"
-  resolved "https://registry.yarnpkg.com/cozy-jobs-cli/-/cozy-jobs-cli-1.9.3.tgz#777840f89d313b7be5f1cb71ac3dc4c6587124c6"
-  integrity sha512-g4tjmNavTQQzEFAF/hkwt2EHyuA/EZk40ZYNQkI0NZfzwBmeeeM3OcI+rlwSipZrmGwECfwHOK9I9nN8z+LnUQ==
+cozy-jobs-cli@1.9.7:
+  version "1.9.7"
+  resolved "https://registry.yarnpkg.com/cozy-jobs-cli/-/cozy-jobs-cli-1.9.7.tgz#c0b0f9cd1a6e82400577579c5d44ba60ca794cf0"
+  integrity sha512-Mvkwd+34Z6OiVOR96dZngT3PjeMvIfTW6SE0wiSTAwHMKIVPzQ0ZrS38E0t5/QmQAu882FVmL8N19MkDtgjKMw==
   dependencies:
     btoa "1.2.1"
     cheerio "1.0.0-rc.3"
@@ -1281,7 +1281,7 @@ cozy-jobs-cli@1.9.3:
     commander "2.20.0"
     core-js "3.1.4"
     cozy-client-js "0.16.4"
-    cozy-konnector-libs "^4.18.7"
+    cozy-konnector-libs "^4.19.3"
     cozy-logger "1.5.0"
     opn "6.0.0"
     pretty "2.0.0"
@@ -1289,7 +1289,7 @@ cozy-jobs-cli@1.9.3:
     replay "2.4.0"
     strip-json-comments "3.0.1"
 
-cozy-konnector-libs@4.19.3, cozy-konnector-libs@^4.18.7:
+cozy-konnector-libs@4.19.3, cozy-konnector-libs@^4.19.3:
   version "4.19.3"
   resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.19.3.tgz#dc034e4a26cd98cf978f3af6a8ce91c02a659cf7"
   integrity sha512-cuzHEteWcLNnQgTR8XqXl+XujlcgJyoNvRF74jbq6H12aqGNoDrYCluGkIGX8xUk+az/svjlPKtRb3yNFOm0CQ==
