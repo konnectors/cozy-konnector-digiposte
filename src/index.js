@@ -8,8 +8,7 @@ const {
   saveFiles,
   cozyClient,
   requestFactory,
-  errors,
-  signin
+  errors
 } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
 const fulltimeout = Date.now() + 4 * 60 * 1000
@@ -49,38 +48,36 @@ async function fetch(requiredFields) {
   return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
 }
 
-function login({ email, password }) {
-  return signin({
-    url: `https://secure.digiposte.fr/identification-plus`,
-    requestInstance: request,
-    formSelector: 'form',
-    formData: { _username: email, _password: password },
-    validate: (statusCode, $, fullResponse) => {
-      if (
-        fullResponse.request.uri.href ===
-        'https://compte.laposte.fr/fo/v1/login'
-      ) {
-        return false
-      } else if (
-        fullResponse.request.uri.href === 'https://secure.digiposte.fr/'
-      ) {
-        return true
-      } else if (
-        fullResponse.request.uri.href ===
-        'https://secure.digiposte.fr/question-secret'
-      ) {
-        throw new Error(errors.USER_ACTION_NEEDED_CGU_FORM)
-      } else if (
-        fullResponse.request.uri.href ===
-        'https://compte.laposte.fr/fo/v1/checkpoint'
-      ) {
-        throw new Error('USER_ACTION_NEEDED.TWOFA_EXPIRED')
-      } else {
-        log('error', fullResponse.request.uri.href)
-        throw new Error(errors.VENDOR_DOWN)
-      }
-    }
+async function login({ email, password }) {
+  await request.get('https://secure.digiposte.fr/identification-plus')
+  const response = await request.post('https://compte.laposte.fr/v2/signin', {
+    form: {
+      user_type: 'PART',
+      _username: email,
+      _password: password
+    },
+    resolveWithFullResponse: true
   })
+
+  if (response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login') {
+    throw new Error(errors.LOGIN_FAILED)
+  } else if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+    return true
+  } else if (
+    response.request.uri.href === 'https://secure.digiposte.fr/question-secret'
+  ) {
+    throw new Error(errors.USER_ACTION_NEEDED_CGU_FORM)
+  } else if (
+    response.request.uri.href === 'https://compte.laposte.fr/fo/v1/checkpoint'
+  ) {
+    throw new Error('USER_ACTION_NEEDED.TWOFA_EXPIRED')
+  } else {
+    log(
+      'error',
+      `Wrong resulting url after login: ${response.request.uri.href}`
+    )
+    throw new Error(errors.VENDOR_DOWN)
+  }
 }
 
 // Read the XSRF-TOKEN in the cookie jar and set it globably
