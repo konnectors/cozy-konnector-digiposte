@@ -1,6 +1,6 @@
 const { format } = require('date-fns')
 
-const fileDateFormat = date => format(date, 'YYYY-MM-D')
+const fileDateFormat = date => format(date, 'yyyy-MM-d')
 
 const getFileName = doc => {
   if (doc.invoice) {
