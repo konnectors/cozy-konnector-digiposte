@@ -1,0 +1,68 @@
+{
+  "version": "1.11.0",
+  "name": "Digiposte",
+  "type": "konnector",
+  "language": "node",
+  "icon": "digiposte.svg",
+  "slug": "digiposte",
+  "source": "git@github.com:konnectors/cozy-konnector-digiposte.git",
+  "editor": "Cozy",
+  "vendor_link": "https://secure.digiposte.fr",
+  "categories": [
+    "online_services"
+  ],
+  "screenshots": [],
+  "fields": {
+    "email": {
+      "type": "email"
+    },
+    "password": {
+      "type": "password"
+    },
+    "advancedFields": {
+      "folderPath": {
+        "advanced": true,
+        "isRequired": false
+      }
+    }
+  },
+  "data_types": [
+    "document"
+  ],
+  "permissions": {
+    "bills": {
+      "description": "Required to save the bills data",
+      "type": "io.cozy.bills"
+    },
+    "files": {
+      "description": "Required to save files",
+      "type": "io.cozy.files"
+    },
+    "accounts": {
+      "description": "Required to get the account's data",
+      "type": "io.cozy.accounts",
+      "verbs": [
+        "GET"
+      ]
+    }
+  },
+  "developer": {
+    "name": "Cozy Cloud",
+    "url": "https://cozy.io"
+  },
+  "langs": [
+    "fr",
+    "en"
+  ],
+  "locales": {
+    "fr": {
+      "short_description": "Récupére tous vos documents Digiposte",
+      "long_description": "Récupérez l'ensemble de vos documents Digiposte dans votre Cozy."
+    },
+    "en": {
+      "short_description": "Fetch all Digiposte documents",
+      "long_description": "Get all of your Digiposte documents in your Cozy."
+    }
+  },
+  "manifest_version": "2"
+}

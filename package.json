@@ -1,0 +1,57 @@
+{
+  "name": "cozy-konnector-digiposte",
+  "version": "1.11.0",
+  "description": "Import your digiposte files",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cozy/cozy-konnector-digiposte.git"
+  },
+  "keywords": [],
+  "author": "Cozy Cloud",
+  "license": "AGPL-3.0",
+  "main": "./src/index.js",
+  "eslintConfig": {
+    "extends": [
+      "cozy-app"
+    ]
+  },
+  "eslintIgnore": [
+    "build"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint"
+    }
+  },
+  "scripts": {
+    "start": "node ./src/index.js",
+    "dev": "cozy-konnector-dev",
+    "standalone": "cozy-konnector-standalone",
+    "pretest": "npm run clean",
+    "test": "konitor testit .",
+    "check": "konitor check .",
+    "clean": "rm -rf ./data",
+    "build": "webpack",
+    "lint": "eslint --fix .",
+    "deploy": "git-directory-deploy --directory build/ --branch ${DEPLOY_BRANCH:-build} --repo=${DEPLOY_REPOSITORY:-git@github.com:konnectors/cozy-konnector-digiposte.git}",
+    "cozyPublish": "cozy-app-publish --token $REGISTRY_TOKEN --build-commit $(git rev-parse ${DEPLOY_BRANCH:-build})",
+    "travisDeployKey": "./bin/generate_travis_deploy_key"
+  },
+  "dependencies": {
+    "bluebird": "3.7.1",
+    "cozy-konnector-libs": "4.32.0",
+    "date-fns": "2.8.0"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "5.0.5",
+    "cozy-app-publish": "0.20.0",
+    "cozy-jobs-cli": "1.10.4",
+    "eslint-config-cozy-app": "1.3.3",
+    "git-directory-deploy": "1.5.1",
+    "husky": "3.0.9",
+    "konitor": "0.10.3",
+    "svgo": "1.3.2",
+    "webpack": "4.41.2",
+    "webpack-cli": "3.3.10"
+  }
+}
