@@ -38,9 +38,9 @@
     "travisDeployKey": "./bin/generate_travis_deploy_key"
   },
   "dependencies": {
-    "bluebird": "3.7.1",
+    "bluebird": "3.7.2",
     "cozy-konnector-libs": "4.32.0",
-    "date-fns": "2.8.0"
+    "date-fns": "2.8.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "5.0.5",
