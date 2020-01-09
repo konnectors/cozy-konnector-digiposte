@@ -33,7 +33,7 @@ async function fetch(requiredFields) {
   sourceAccount = this._account._id
   sourceAccountIdentifier = requiredFields.email
   // Login and fetch multiples tokens
-  await login(requiredFields)
+  await login.bind(this)(requiredFields)
   await fetchTokens(requiredFields.password)
   request = request.defaults({
     auth: {
@@ -48,13 +48,14 @@ async function fetch(requiredFields) {
   return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
 }
 
-async function login({ email, password }) {
+async function login(fields) {
+  await this.deactivateAutoSuccessfulLogin()
   await request.get('https://secure.digiposte.fr/identification-plus')
   const response = await request.post('https://compte.laposte.fr/v2/signin', {
     form: {
       user_type: 'PART',
-      _username: email,
-      _password: password
+      _username: fields.email,
+      _password: fields.password
     },
     resolveWithFullResponse: true
   })
@@ -62,6 +63,7 @@ async function login({ email, password }) {
   if (response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login') {
     throw new Error(errors.LOGIN_FAILED)
   } else if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+    await this.notifySuccessfulLogin()
     return true
   } else if (
     response.request.uri.href === 'https://secure.digiposte.fr/question-secret'
@@ -70,7 +72,8 @@ async function login({ email, password }) {
   } else if (
     response.request.uri.href === 'https://compte.laposte.fr/fo/v1/checkpoint'
   ) {
-    throw new Error('USER_ACTION_NEEDED.TWOFA_EXPIRED')
+    await handle2FA.bind(this)()
+    await this.notifySuccessfulLogin()
   } else {
     log(
       'error',
@@ -145,6 +148,21 @@ async function fetchTokens(password) {
       'X-XSRF-TOKEN': xsrfToken
     }
   })
+}
+
+async function handle2FA() {
+  const code = await this.waitForTwoFaCode({
+    type: 'sms'
+  })
+  const response = await request.post('https://compte.laposte.fr/v2/2fa', {
+    form: { code },
+    resolveWithFullResponse: true
+  })
+  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+    return true
+  } else {
+    throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
+  }
 }
 
 // create a folder if it does not already exist
