@@ -305,7 +305,8 @@ async function fetchFolder(body, rootPath, timeout) {
           timeout: now + timeForThisFolder,
           sourceAccount,
           sourceAccountIdentifier,
-          fileIdAttributes: ['docid']
+          fileIdAttributes: ['docid'],
+          concurrency: 4
         }
       )
     }
