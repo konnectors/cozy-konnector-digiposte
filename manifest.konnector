@@ -1,5 +1,5 @@
 {
-  "version": "1.13.0",
+  "version": "1.9.2",
   "name": "Digiposte",
   "type": "konnector",
   "language": "node",
@@ -40,7 +40,10 @@
     },
     "accounts": {
       "description": "Required to get the account's data",
-      "type": "io.cozy.accounts"
+      "type": "io.cozy.accounts",
+      "verbs": [
+        "GET"
+      ]
     }
   },
   "developer": {
@@ -54,11 +57,11 @@
   "locales": {
     "fr": {
       "short_description": "Récupére tous vos documents Digiposte",
-      "long_description": "Récupérez l'ensemble de vos documents Digiposte dans votre Cozy."
+      "long_description": "Récupérez l'ensemble de vos documents Digiposte dans votre Cozy.\n\nAttention, en cas d'import d'un grand nombre de fichiers, il peut être nécessaire de lancer le connecteur à plusieurs reprises.\n\nSi vous activez l'authentification forte avec SMS sur le site de digiposte alors le connecteur ne pourra être lancé que manuellement avec le code reçu par sms à indiquer."
     },
     "en": {
       "short_description": "Fetch all Digiposte documents",
-      "long_description": "Get all of your Digiposte documents in your Cozy."
+      "long_description": "Get all of your Digiposte documents in your Cozy.\n\nWarning, if you try to import numerous files, you may need to run the connectors several times.\n\nIf you activate strong authentification on the digiposte website, the connector need to be launch manually with the code you received by text message."
     }
   },
   "manifest_version": "2"
