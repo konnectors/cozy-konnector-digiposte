@@ -1,5 +1,5 @@
 {
-  "version": "1.9.2",
+  "version": "1.13.0",
   "name": "Digiposte",
   "type": "konnector",
   "language": "node",
@@ -40,10 +40,7 @@
     },
     "accounts": {
       "description": "Required to get the account's data",
-      "type": "io.cozy.accounts",
-      "verbs": [
-        "GET"
-      ]
+      "type": "io.cozy.accounts"
     }
   },
   "developer": {
