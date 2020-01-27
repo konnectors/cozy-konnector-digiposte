@@ -7,7 +7,7 @@
   "slug": "digiposte",
   "source": "git@github.com:konnectors/cozy-konnector-digiposte.git",
   "editor": "Cozy",
-  "vendor_link": "https://secure.digiposte.fr",
+  "vendor_link": "https://compte.laposte.fr/fo/v1/login",
   "categories": [
     "online_services"
   ],
