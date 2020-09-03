@@ -41,7 +41,7 @@
     "date-fns": "2.16.1"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "6.0.3",
+    "copy-webpack-plugin": "6.1.0",
     "cozy-app-publish": "0.25.0",
     "cozy-jobs-cli": "1.13.6",
     "eslint-config-cozy-app": "1.5.0",
