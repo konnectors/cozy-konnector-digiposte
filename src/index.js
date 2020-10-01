@@ -72,7 +72,19 @@ async function login(fields) {
   } else if (
     response.request.uri.href === 'https://compte.laposte.fr/fo/v1/checkpoint'
   ) {
-    await handle2FA.bind(this)()
+    await handle2FA.bind(this)({
+      media: 'sms',
+      url: 'https://compte.laposte.fr/v2/2fa'
+    })
+    await this.notifySuccessfulLogin()
+  } else if (
+    response.request.uri.href ===
+    'https://secure.digiposte.fr/identification-totp'
+  ) {
+    await handle2FA.bind(this)({
+      media: 'app',
+      url: 'https://secure.digiposte.fr/identification-totp'
+    })
     await this.notifySuccessfulLogin()
   } else {
     log(
@@ -150,11 +162,11 @@ async function fetchTokens(password) {
   })
 }
 
-async function handle2FA() {
+async function handle2FA({ media, url }) {
   const code = await this.waitForTwoFaCode({
-    type: 'sms'
+    type: media
   })
-  const response = await request.post('https://compte.laposte.fr/v2/2fa', {
+  const response = await request.post(url, {
     form: { code },
     resolveWithFullResponse: true
   })
