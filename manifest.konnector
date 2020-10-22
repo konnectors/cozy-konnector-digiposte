@@ -26,6 +26,10 @@
       }
     }
   },
+  "time_interval": [
+    0,
+    24
+  ],
   "data_types": [
     "document"
   ],
@@ -61,5 +65,9 @@
       "long_description": "Get all of your Digiposte documents in your Cozy.\n\nWarning, if you try to import numerous files, you may need to run the connectors several times.\n\nIf you activate strong authentification on the digiposte website, the connector need to be launch manually with the code you received by text message."
     }
   },
+  "features": [
+    "LOGIN_OK",
+    "METADATA_DEDUP"
+  ],
   "manifest_version": "2"
 }
