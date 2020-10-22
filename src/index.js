@@ -8,7 +8,8 @@ const {
   saveFiles,
   cozyClient,
   requestFactory,
-  errors
+  errors,
+  solveCaptcha
 } = require('cozy-konnector-libs')
 const { getFileName } = require('./utils')
 const fulltimeout = Date.now() + 4 * 60 * 1000
@@ -51,8 +52,17 @@ async function fetch(requiredFields) {
 async function login(fields) {
   await this.deactivateAutoSuccessfulLogin()
   await request.get('https://secure.digiposte.fr/identification-plus')
+
+  const secureToken = await solveCaptcha({
+    type: 'hcaptcha',
+    websiteKey: '0caa33b7-a445-43e4-a258-5affe1597c49',
+    websiteURL: 'https://compte.laposte.fr/fo/v1/login?captcha=1'
+  })
+
   const response = await request.post('https://compte.laposte.fr/v2/signin', {
     form: {
+      'g-recaptcha-response': secureToken,
+      'h-captcha-response': secureToken,
       user_type: 'PART',
       _username: fields.email,
       _password: fields.password
