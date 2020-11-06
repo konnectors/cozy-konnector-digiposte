@@ -16,7 +16,7 @@ const fulltimeout = Date.now() + 4 * 60 * 1000
 let request = requestFactory()
 const j = request.jar()
 request = requestFactory({
-  // debug: true,
+  debug: true,
   cheerio: true,
   json: false,
   jar: j
@@ -51,7 +51,16 @@ async function fetch(requiredFields) {
 
 async function login(fields) {
   await this.deactivateAutoSuccessfulLogin()
-  await request.get('https://secure.digiposte.fr/identification-plus')
+  const respInit = await request.get({
+    uri: 'https://secure.digiposte.fr/identification-plus',
+    resolveWithFullResponse: true
+  })
+  const state = respInit.request.href.match(/state=([0-9a-z\-]*)/)[1]
+  const codeChallenge = respInit.request.href.match(/code_challenge=(.*?)&/)
+
+  await request.get({
+    uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=e804c8efde877a0925c9e3a7d5a98e17`
+  })
 
   const secureToken = await solveCaptcha({
     type: 'hcaptcha',
