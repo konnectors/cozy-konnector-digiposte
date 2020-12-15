@@ -44,7 +44,7 @@ async function fetch(requiredFields) {
   // Now get the list of folders
   log('info', 'Getting the list of folders')
   const folders = await request(
-    'https://secure.digiposte.fr/api/v3/folders/safe'
+    'https://api.digiposte.fr/api/v3/folders'
   )
   return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
 }
@@ -55,8 +55,9 @@ async function login(fields) {
     uri: 'https://secure.digiposte.fr/identification-plus',
     resolveWithFullResponse: true
   })
-  const state = respInit.request.href.match('/state=([0-9a-z-]*)/')[1]
+  const state = respInit.request.href.match(/state=([0-9a-z-]*)/)[1]
   const codeChallenge = respInit.request.href.match(/code_challenge=(.*?)&/)[1]
+  // We set a fix fingerprint here
   await request.get({
     uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=e804c8efde877a0925c9e3a7d5a98e15`
   })
@@ -226,14 +227,14 @@ async function fetchFolder(body, rootPath, timeout) {
     }
     log('info', (folder.name || 'root_dir') + '...')
     folder = await request.post(
-      'https://secure.digiposte.fr/api/v3/documents/search',
+      'https://api.digiposte.fr/api/v3/documents/search',
       {
         headers: {
           Authorization: `Bearer ${healthToken}` //* Need the health-token here
         },
         qs: {
           direction: 'DESCENDING',
-          max_results: 100,
+          max_results: 1000,
           sort: 'CREATION_DATE'
         },
         body: {
