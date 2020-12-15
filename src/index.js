@@ -51,7 +51,15 @@ async function fetch(requiredFields) {
 
 async function login(fields) {
   await this.deactivateAutoSuccessfulLogin()
-  await request.get('https://secure.digiposte.fr/identification-plus')
+  const respInit = await request.get({
+    uri: 'https://secure.digiposte.fr/identification-plus',
+    resolveWithFullResponse: true
+  })
+  const state = respInit.request.href.match('/state=([0-9a-z-]*)/')[1]
+  const codeChallenge = respInit.request.href.match(/code_challenge=(.*?)&/)[1]
+  await request.get({
+    uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=e804c8efde877a0925c9e3a7d5a98e15`
+  })
 
   const secureToken = await solveCaptcha({
     type: 'hcaptcha',
@@ -238,7 +246,7 @@ async function fetchFolder(body, rootPath, timeout) {
       let tmpDoc = {
         docid: doc.id,
         type: doc.category,
-        fileurl: `https://secure.digiposte.fr/rest/content/document?_xsrf_token=${xsrfToken}`,
+        fileurl: `https://secure.digiposte.fr/rest/content/document`,
         filename: getFileName(doc),
         vendor: doc.sender_name,
         requestOptions: {
@@ -246,6 +254,9 @@ async function fetchFolder(body, rootPath, timeout) {
           jar: j,
           form: {
             'document_ids[]': doc.id
+          },
+          headers: {
+            'X-XSRF-TOKEN': xsrfToken
           }
         }
       }
