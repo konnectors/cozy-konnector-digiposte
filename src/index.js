@@ -184,8 +184,8 @@ async function handle2FA() {
 }
 
 // create a folder if it does not already exist
-function mkdirp(path, folderName) {
-  folderName = sanitizeFolderName(folderName)
+function mkdirp(path, folderNameInput) {
+  const folderName = sanitizeFolderName(folderNameInput)
   return cozyClient.files.statByPath(`${path}/${folderName}`).catch(err => {
     log('info', err.message, `${path} folder does not exist yet, creating it`)
     return cozyClient.files
