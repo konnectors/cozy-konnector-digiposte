@@ -43,9 +43,7 @@ async function fetch(requiredFields) {
   })
   // Now get the list of folders
   log('info', 'Getting the list of folders')
-  const folders = await request(
-    'https://api.digiposte.fr/api/v3/folders'
-  )
+  const folders = await request('https://api.digiposte.fr/api/v3/folders')
   return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
 }
 
@@ -319,7 +317,7 @@ async function fetchFolder(body, rootPath, timeout) {
       `Time for this folder : ${Math.floor(timeForThisFolder / 1000)}s`
     )
     await mkdirp(rootPath, folder.name)
-    if (folder.docs) {
+    if (folder.docs && folder.docs.length > 0) {
       await saveFiles(
         folder.docs,
         `${rootPath}/${sanitizeFolderName(folder.name)}`,
