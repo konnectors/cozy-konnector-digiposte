@@ -67,7 +67,9 @@
   },
   "features": [
     "LOGIN_OK",
-    "METADATA_DEDUP"
+    "METADATA_DEDUP",
+    "CAPTCHA_RESOLUTION",
+    "CARBON_COPY"
   ],
   "manifest_version": "2"
 }
