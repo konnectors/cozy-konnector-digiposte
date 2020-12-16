@@ -77,8 +77,11 @@ async function login(fields) {
     resolveWithFullResponse: true
   })
 
-  if (response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login' ||
-     response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login?captcha=1') {
+  if (
+    response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login' ||
+    response.request.uri.href ===
+      'https://compte.laposte.fr/fo/v1/login?captcha=1'
+  ) {
     throw new Error(errors.LOGIN_FAILED)
   } else if (response.request.uri.href === 'https://secure.digiposte.fr/') {
     await this.notifySuccessfulLogin()
@@ -224,7 +227,10 @@ async function fetchFolder(body, rootPath, timeout) {
       name: folder.name,
       folders: folder.folders
     }
-    log('debug', 'Fetching files in folder : ' + (folder.name || 'root_dir') + '...')
+    log(
+      'debug',
+      'Fetching files in folder : ' + (folder.name || 'root_dir') + '...'
+    )
     folder = await request.post(
       'https://api.digiposte.fr/api/v3/documents/search',
       {
@@ -249,6 +255,10 @@ async function fetchFolder(body, rootPath, timeout) {
         fileurl: `https://secure.digiposte.fr/rest/content/document`,
         filename: getFileName(doc),
         vendor: doc.sender_name,
+        fileAttributes: {
+          carbonCopy: true,
+          electronicSafe: true
+        },
         requestOptions: {
           method: 'POST',
           jar: j,
@@ -280,17 +290,17 @@ async function fetchFolder(body, rootPath, timeout) {
           Date.UTC(creationDateObj.getFullYear(), creationDateObj.getMonth(), 1)
         ).toISOString()
 
-        tmpDoc.fileAttributes = {
-          metadata: {
-            classification: 'payslip',
-            datetime: firstDayStg,
-            datetimeLabel: 'startDate',
-            contentAuthor: 'orange',
-            startDate: firstDayStg,
-            endDate: lastDayObj.toISOString(),
-            issueDate: doc.creation_date
-          }
-        }
+        tmpDoc.fileAttributes = { ...tmpDoc.fileAttributes,
+                                  metadata: {
+                                    classification: 'payslip',
+                                    datetime: firstDayStg,
+                                    datetimeLabel: 'startDate',
+                                    contentAuthor: 'orange',
+                                    startDate: firstDayStg,
+                                    endDate: lastDayObj.toISOString(),
+                                    issueDate: doc.creation_date
+                                  }
+                                }
       }
       return tmpDoc
     })

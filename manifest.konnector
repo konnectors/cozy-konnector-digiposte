@@ -45,6 +45,12 @@
     "accounts": {
       "description": "Required to get the account's data",
       "type": "io.cozy.accounts"
+    },
+    "carbon copy": {
+      "type": "io.cozy.certified.carbonCopy"
+    },
+    "electronic safe": {
+      "type": "io.cozy.certified.electronicSafe"
     }
   },
   "developer": {
