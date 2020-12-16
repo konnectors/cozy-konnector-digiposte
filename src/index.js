@@ -77,7 +77,8 @@ async function login(fields) {
     resolveWithFullResponse: true
   })
 
-  if (response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login') {
+  if (response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login' ||
+     response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login?captcha=1') {
     throw new Error(errors.LOGIN_FAILED)
   } else if (response.request.uri.href === 'https://secure.digiposte.fr/') {
     await this.notifySuccessfulLogin()
@@ -223,7 +224,7 @@ async function fetchFolder(body, rootPath, timeout) {
       name: folder.name,
       folders: folder.folders
     }
-    log('info', (folder.name || 'root_dir') + '...')
+    log('debug', 'Fetching files in folder : ' + (folder.name || 'root_dir') + '...')
     folder = await request.post(
       'https://api.digiposte.fr/api/v3/documents/search',
       {
