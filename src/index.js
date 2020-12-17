@@ -257,8 +257,7 @@ async function fetchFolder(body, rootPath, timeout) {
         vendor: doc.sender_name,
         fileAttributes: {
           metadata: {
-            carbonCopy: true,
-            electronicSafe: true
+            carbonCopy: true
           }
         },
         requestOptions: {
@@ -295,6 +294,7 @@ async function fetchFolder(body, rootPath, timeout) {
         tmpDoc.fileAttributes = {
           metadata: {
             ...tmpDoc.fileAttributes.medata,
+            electronicSafe: true,
             classification: 'payslip',
             datetime: firstDayStg,
             datetimeLabel: 'startDate',
