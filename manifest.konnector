@@ -46,11 +46,11 @@
       "description": "Required to get the account's data",
       "type": "io.cozy.accounts"
     },
-    "carbon copy": {
-      "type": "io.cozy.certified.carbonCopy"
+    "carboncopy": {
+      "type": "io.cozy.certified.carboncopy"
     },
-    "electronic safe": {
-      "type": "io.cozy.certified.electronicSafe"
+    "electronicsafe": {
+      "type": "io.cozy.certified.electronicsafe"
     }
   },
   "developer": {
@@ -64,11 +64,23 @@
   "locales": {
     "fr": {
       "short_description": "Récupére tous vos documents Digiposte",
-      "long_description": "Récupérez l'ensemble de vos documents Digiposte dans votre Cozy.\n\nAttention, en cas d'import d'un grand nombre de fichiers, il peut être nécessaire de lancer le connecteur à plusieurs reprises.\n\nSi vous activez l'authentification forte avec SMS sur le site de digiposte alors le connecteur ne pourra être lancé que manuellement avec le code reçu par sms à indiquer."
+      "long_description": "Récupérez l'ensemble de vos documents Digiposte dans votre Cozy.\n\nAttention, en cas d'import d'un grand nombre de fichiers, il peut être nécessaire de lancer le connecteur à plusieurs reprises.\n\nSi vous activez l'authentification forte avec SMS sur le site de digiposte alors le connecteur ne pourra être lancé que manuellement avec le code reçu par sms à indiquer.",
+      "carboncopy": {
+        "description": "Utilisé pour certifier vos fichiers copie conforme avec les documents d'origine"
+      },
+      "electronicsafe": {
+        "description": "Utilisé pour certifier que vos fichiers copie proviennent d'un coffre electronique."
+      }
     },
     "en": {
       "short_description": "Fetch all Digiposte documents",
-      "long_description": "Get all of your Digiposte documents in your Cozy.\n\nWarning, if you try to import numerous files, you may need to run the connectors several times.\n\nIf you activate strong authentification on the digiposte website, the connector need to be launch manually with the code you received by text message."
+      "long_description": "Get all of your Digiposte documents in your Cozy.\n\nWarning, if you try to import numerous files, you may need to run the connectors several times.\n\nIf you activate strong authentification on the digiposte website, the connector need to be launch manually with the code you received by text message.",
+      "carboncopy": {
+        "description": "Required for carbon copy documents"
+      },
+      "electronicsafe": {
+        "description": "Required for documents providing from an electronic safe"
+      }
     }
   },
   "features": [
