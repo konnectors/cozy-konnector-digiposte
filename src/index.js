@@ -256,8 +256,10 @@ async function fetchFolder(body, rootPath, timeout) {
         filename: getFileName(doc),
         vendor: doc.sender_name,
         fileAttributes: {
-          carbonCopy: true,
-          electronicSafe: true
+          metadata: {
+            carbonCopy: true,
+            electronicSafe: true
+          }
         },
         requestOptions: {
           method: 'POST',
@@ -290,17 +292,18 @@ async function fetchFolder(body, rootPath, timeout) {
           Date.UTC(creationDateObj.getFullYear(), creationDateObj.getMonth(), 1)
         ).toISOString()
 
-        tmpDoc.fileAttributes = { ...tmpDoc.fileAttributes,
-                                  metadata: {
-                                    classification: 'payslip',
-                                    datetime: firstDayStg,
-                                    datetimeLabel: 'startDate',
-                                    contentAuthor: 'orange',
-                                    startDate: firstDayStg,
-                                    endDate: lastDayObj.toISOString(),
-                                    issueDate: doc.creation_date
-                                  }
-                                }
+        tmpDoc.fileAttributes = {
+          metadata: {
+            ...tmpDoc.fileAttributes.medata,
+            classification: 'payslip',
+            datetime: firstDayStg,
+            datetimeLabel: 'startDate',
+            contentAuthor: 'orange',
+            startDate: firstDayStg,
+            endDate: lastDayObj.toISOString(),
+            issueDate: doc.creation_date
+          }
+        }
       }
       return tmpDoc
     })
