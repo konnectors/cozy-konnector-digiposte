@@ -67,10 +67,10 @@
       "long_description": "Récupérez l'ensemble de vos documents Digiposte dans votre Cozy.\n\nAttention, en cas d'import d'un grand nombre de fichiers, il peut être nécessaire de lancer le connecteur à plusieurs reprises.\n\nSi vous activez l'authentification forte avec SMS sur le site de digiposte alors le connecteur ne pourra être lancé que manuellement avec le code reçu par sms à indiquer.",
       "permissions": {
         "carboncopy": {
-          "description": "Utilisé pour certifier vos fichiers copie conforme avec les documents d'origine"
+          "description": "Utilisé pour certifier que vos fichiers sont copie conforme avec les documents d'origine"
         },
         "electronicsafe": {
-          "description": "Utilisé pour certifier que vos fichiers copie proviennent d'un coffre electronique."
+          "description": "Utilisé pour certifier que vos fichiers proviennent d'un coffre électronique."
         }
       }
     },
