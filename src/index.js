@@ -95,6 +95,16 @@ async function login(fields) {
   ) {
     await handle2FA.bind(this)()
     await this.notifySuccessfulLogin()
+  } else if (
+    response.request.uri.href.includes(
+      'https://auth.digiposte.fr/otp-mail?state='
+    )
+  ) {
+    // This url is triggered when manual OTP is forced by digiposte
+    const state = response.request.uri.href.match(/state=([0-9a-z-]*)/)[1]
+    const code = response.request.headers.referer.match(/code=([0-9a-z]*)/)[1]
+    await handle2FAMailOTP.bind(this)(state, code)
+    await this.notifySuccessfulLogin()
   } else {
     log(
       'error',
@@ -183,6 +193,38 @@ async function handle2FA() {
     return true
   } else {
     throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
+  }
+}
+
+async function handle2FAMailOTP(state, codeLogin) {
+  const code = await this.waitForTwoFaCode({
+    type: 'email'
+  })
+  // Validating the code
+  let response
+  try {
+    response = await request.post(`https://auth.digiposte.fr/otp`, {
+      form: {
+        otpMail: code,
+        state
+      },
+      resolveWithFullResponse: true
+    })
+  } catch (e) {
+    if (e.statusCode === 401) {
+      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
+    } else throw e
+  }
+  // Ending login
+  response = await request({
+    uri: `https://secure.digiposte.fr/callback?code=${codeLogin}&state=${state}`,
+    resolveWithFullResponse: true
+  })
+  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+    return true
+  } else {
+    log('error', 'Unknown error after validating twoFACode')
+    throw new Error('VENDOR_DOWN')
   }
 }
 
