@@ -197,9 +197,11 @@ async function handle2FA() {
 }
 
 async function handle2FAMailOTP(state, codeLogin) {
-  const code = await this.waitForTwoFaCode({
+  let code = await this.waitForTwoFaCode({
     type: 'email'
   })
+  // Email encourage code in XXX-XXX form, we remove the hyphen if found
+  code = code.replace('-', '')
   // Validating the code
   let response
   try {
