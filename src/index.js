@@ -21,7 +21,6 @@ request = requestFactory({
   json: false,
   jar: j
 })
-const crypto = require('crypto')
 
 let xsrfToken = null
 let accessToken = null
@@ -34,8 +33,18 @@ module.exports = new BaseKonnector(fetch)
 async function fetch(requiredFields) {
   sourceAccount = this._account._id
   sourceAccountIdentifier = requiredFields.email
+  // Using account id to make predictable fingerprint
+  let fingerPrintToUse = this._account._id
+  if (fingerPrintToUse.length != 32 || !isHexadecimalString(fingerPrintToUse)) {
+    log(
+      'debug',
+      'Account id is not an hexa 32 char string. Backfalling on hard coded fingerprint'
+    )
+    fingerPrintToUse = 'e804c8efde877a0925c9e3a7d5a98e15'
+  }
+  log('debug', `Using fingerPrint ${fingerPrintToUse}`)
   // Login and fetch multiples tokens
-  await login.bind(this)(requiredFields)
+  await login.bind(this)(requiredFields, fingerPrintToUse)
   await fetchTokens(requiredFields.password)
   request = request.defaults({
     auth: {
@@ -48,7 +57,7 @@ async function fetch(requiredFields) {
   return fetchFolder(folders, requiredFields.folderPath, fulltimeout)
 }
 
-async function login(fields) {
+async function login(fields, fingerprint) {
   await this.deactivateAutoSuccessfulLogin()
   const respInit = await request.get({
     uri: 'https://secure.digiposte.fr/identification-plus',
@@ -56,10 +65,8 @@ async function login(fields) {
   })
   const state = respInit.request.href.match(/state=([0-9a-z-]*)/)[1]
   const codeChallenge = respInit.request.href.match(/code_challenge=(.*?)&/)[1]
-  // We generate a fingerprint here (32 hexa char)
-  const randomString = crypto.randomBytes(16).toString('hex')
   await request.get({
-    uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=${randomString}`
+    uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=${fingerprint}`
   })
 
   const secureToken = await solveCaptcha({
@@ -399,4 +406,9 @@ async function fetchFolder(body, rootPath, timeout) {
       )
     }
   }
+}
+
+function isHexadecimalString(string) {
+  const regexp = /[0-9A-Fa-f]{6}/g
+  return regexp.test(string)
 }
