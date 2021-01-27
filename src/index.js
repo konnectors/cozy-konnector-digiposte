@@ -59,6 +59,9 @@ async function fetch(requiredFields) {
 
 async function login(fields, fingerprint) {
   await this.deactivateAutoSuccessfulLogin()
+  if (process.env.COZY_JOB_MANUAL_EXECUTION !== 'true') {
+    log('warn', 'Login during a manual execution')
+  }
   const respInit = await request.get({
     uri: 'https://secure.digiposte.fr/identification-plus',
     resolveWithFullResponse: true
