@@ -1,6 +1,6 @@
 {
   "name": "cozy-konnector-digiposte",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "description": "Import your digiposte files",
   "repository": {
     "type": "git",
@@ -37,11 +37,11 @@
   },
   "dependencies": {
     "bluebird": "3.7.2",
-    "cozy-konnector-libs": "4.38.2",
+    "cozy-konnector-libs": "4.39.1",
     "date-fns": "2.16.1"
   },
   "devDependencies": {
-    "cozy-jobs-cli": "1.15.5",
+    "cozy-jobs-cli": "1.15.7",
     "cozy-konnector-build": "1.1.5"
   }
 }
