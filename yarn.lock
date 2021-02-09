@@ -1082,17 +1082,6 @@ cozy-device-helper@^1.7.3:
   dependencies:
     lodash "4.17.19"
 
-cozy-doctypes@^1.75.1:
-  version "1.75.1"
-  resolved "https://registry.yarnpkg.com/cozy-doctypes/-/cozy-doctypes-1.75.1.tgz#76effe72fb233f03bb77be06dd82f88754d8efbd"
-  integrity sha512-9PX/Dv+jYVV4TfDfBpu4TbVudv8PIHzbLUNwY7FyZ4poyGvRSFE8YFvnHgO0ShREgCJ2Ivw3lVJuF6xpkJHv6g==
-  dependencies:
-    cozy-logger "^1.6.0"
-    date-fns "1.30.1"
-    es6-promise-pool "2.5.0"
-    lodash "4.17.19"
-    prop-types "^15.7.2"
-
 cozy-doctypes@^1.77.0:
   version "1.77.0"
   resolved "https://registry.yarnpkg.com/cozy-doctypes/-/cozy-doctypes-1.77.0.tgz#7e8be3df0cdd7ddc932703c9868e4fa0489c1cad"
@@ -1137,36 +1126,7 @@ cozy-konnector-build@1.1.7:
     webpack "5.21.2"
     webpack-cli "4.5.0"
 
-cozy-konnector-libs@4.39.1:
-  version "4.39.1"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.39.1.tgz#02dbf84b5875ae8ea81df7b028c7af834c970af7"
-  integrity sha512-z8zUq4U8Yf/jYwj2EbbXjeF8/ZWGUWqt+CYhknGiLizU7LHqVW916z8yO8Ii0HKg/zyWl9SeIPSUFr4MPWFfgw==
-  dependencies:
-    babel-runtime "^6.26.0"
-    bluebird "^3.7.2"
-    bluebird-retry "^0.11.0"
-    btoa "1.2.1"
-    cheerio "^1.0.0-rc.5"
-    classificator "^0.3.3"
-    cozy-client "^16.10.2"
-    cozy-client-js "^0.17.4"
-    cozy-doctypes "^1.75.1"
-    cozy-logger "^1.6.0"
-    date-fns "^2.16.1"
-    file-type "^16.1.0"
-    geco "^0.11.1"
-    lodash-id "^0.14.0"
-    lowdb "^1.0.0"
-    mime-types "^2.1.27"
-    node-fetch "^2.6.1"
-    raven "^2.6.4"
-    raw-body "^2.4.1"
-    request "^2.88.2"
-    request-debug "^0.2.0"
-    request-promise "^4.2.6"
-    strip-json-comments "^3.1.1"
-
-cozy-konnector-libs@^4.40.1:
+cozy-konnector-libs@4.40.1, cozy-konnector-libs@^4.40.1:
   version "4.40.1"
   resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.40.1.tgz#327aaad9ac01a92d8233401c445d88c2a4ad3701"
   integrity sha512-6330IUsgPkKfkcZ8hTYacUnRO5UK0jtfBlhf2Z0wdNp5GLe0mnjWou6MU3F9FKa+WKN3IuuC2N/mKwjJOf4Q3g==
@@ -1320,7 +1280,7 @@ date-fns@1.30.1:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
 
-date-fns@2.16.1, date-fns@^2.16.1:
+date-fns@2.16.1:
   version "2.16.1"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.16.1.tgz#05775792c3f3331da812af253e1a935851d3834b"
   integrity sha512-sAJVKx/FqrLYHAQeN7VpJrPhagZc9R4ImZIWYRFZaaohR3KzmuK88touwsSwSVT8Qcbd4zoDsnGfX4GFB4imyQ==
@@ -1969,16 +1929,6 @@ file-entry-cache@^5.0.1:
   integrity sha512-bCg29ictuBaKUwwArK4ouCaqDgLZcysCFLmM/Yn/FDoqndh/9vNuQfXRDvTuXKLxfD/JtZQGKFT8MGcJBK644g==
   dependencies:
     flat-cache "^2.0.1"
-
-file-type@^16.1.0:
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/file-type/-/file-type-16.1.0.tgz#1c8a4458b2103e07d2b49ae7f76384abafe86529"
-  integrity sha512-G4Klqf6tuprtG0pC4r9kni4Wv8XhAAsfHphVqsQGA+YiOlPAO40BZduDqKfv0RFsu9q9ZbFObWfwszY/NqhEZw==
-  dependencies:
-    readable-web-to-node-stream "^3.0.0"
-    strtok3 "^6.0.3"
-    token-types "^2.0.0"
-    typedarray-to-buffer "^3.1.5"
 
 file-type@^16.2.0:
   version "16.2.0"
