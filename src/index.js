@@ -24,7 +24,6 @@ request = requestFactory({
 
 let xsrfToken = null
 let accessToken = null
-let healthToken = null
 
 let sourceAccount, sourceAccountIdentifier
 
@@ -40,12 +39,13 @@ async function fetch(requiredFields) {
       'debug',
       'Account id is not an hexa 32 char string. Backfalling on hard coded fingerprint'
     )
+    // Default fingerprint if no account suitable
     fingerPrintToUse = 'e804c8efde877a0925c9e3a7d5a98e15'
   }
   log('debug', `Using fingerPrint ${fingerPrintToUse}`)
   // Login and fetch multiples tokens
   await login.bind(this)(requiredFields, fingerPrintToUse)
-  await fetchTokens(requiredFields.password)
+  await fetchTokens()
   request = request.defaults({
     auth: {
       bearer: accessToken
@@ -108,6 +108,14 @@ async function login(fields, fingerprint) {
     await handle2FA.bind(this)()
     await this.notifySuccessfulLogin()
   } else if (
+    response.request.uri.href.includes('https://auth.digiposte.fr/totp?state=')
+  ) {
+    // This url is triggered when manual OTP in app is activated by user
+    const state = response.request.uri.href.match(/state=([0-9a-z-]*)/)[1]
+    const code = response.request.headers.referer.match(/code=([0-9a-z]*)/)[1]
+    await handle2FAAppOTP.bind(this)(state, code)
+    await this.notifySuccessfulLogin()
+  } else if (
     response.request.uri.href.includes(
       'https://auth.digiposte.fr/otp-mail?state='
     )
@@ -141,7 +149,7 @@ async function extractXsrfToken() {
   log('debug', 'XSRF token is set to ' + xsrfToken)
 }
 
-async function fetchTokens(password) {
+async function fetchTokens() {
   // Extract a first Xsrf
   extractXsrfToken()
 
@@ -157,7 +165,7 @@ async function fetchTokens(password) {
       'X-XSRF-TOKEN': xsrfToken
     }
   })
-  let body = await request('https://secure.digiposte.fr/rest/security/tokens')
+  let body = await request('https://secure.digiposte.fr/rest/security/token')
   if (body && body.access_token) {
     accessToken = body.access_token
   } else {
@@ -165,25 +173,7 @@ async function fetchTokens(password) {
     throw new Error(errors.VENDOR_DOWN)
   }
 
-  // Requesting healthToken with password
-  log('info', `Getting the health-token`)
-  await request(
-    {
-      url: 'https://secure.digiposte.fr/rest/security/health-token',
-      method: 'POST',
-      headers: {
-        accept: 'application/json, text/plain, */*'
-      },
-      json: {
-        password: password // need password again here
-      }
-    },
-    (error, response, body) => {
-      healthToken = body.access_token
-    }
-  )
-
-  // Extract a second Xsrf as it changed
+  // Extract a second Xsrf as it changed, this one should be usable for all requests
   extractXsrfToken()
   // eslint-disable-next-line require-atomic-updates
   request = request.defaults({
@@ -242,6 +232,41 @@ async function handle2FAMailOTP(state, codeLogin) {
   }
 }
 
+async function handle2FAAppOTP(state, codeLogin) {
+  log('debug', 'Handle 2FA for app_code')
+  let code = await this.waitForTwoFaCode({
+    type: 'app_code'
+  })
+  // Email encourage code in XXX-XXX form, we remove the hyphen if found
+  code = code.replace('-', '')
+  // Validating the code
+  let response
+  try {
+    response = await request.post(`https://auth.digiposte.fr/totp`, {
+      form: {
+        totpCode: code,
+        state
+      },
+      resolveWithFullResponse: true
+    })
+  } catch (e) {
+    if (e.statusCode === 401) {
+      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
+    } else throw e
+  }
+  // Ending login
+  response = await request({
+    uri: `https://secure.digiposte.fr/callback?code=${codeLogin}&state=${state}`,
+    resolveWithFullResponse: true
+  })
+  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+    return true
+  } else {
+    log('error', 'Unknown error after validating App twoFACode')
+    throw new Error('VENDOR_DOWN')
+  }
+}
+
 // create a folder if it does not already exist
 function mkdirp(path, folderNameInput) {
   const folderName = sanitizeFolderName(folderNameInput)
@@ -290,9 +315,6 @@ async function fetchFolder(body, rootPath, timeout) {
     folder = await request.post(
       'https://api.digiposte.fr/api/v3/documents/search',
       {
-        headers: {
-          Authorization: `Bearer ${healthToken}` //* Need the health-token here
-        },
         qs: {
           direction: 'DESCENDING',
           max_results: 1000,
