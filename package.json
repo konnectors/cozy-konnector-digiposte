@@ -42,6 +42,6 @@
   },
   "devDependencies": {
     "cozy-jobs-cli": "1.15.10",
-    "cozy-konnector-build": "1.1.7"
+    "cozy-konnector-build": "1.1.8"
   }
 }
