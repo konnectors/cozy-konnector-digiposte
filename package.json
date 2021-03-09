@@ -41,7 +41,7 @@
     "date-fns": "2.16.1"
   },
   "devDependencies": {
-    "cozy-jobs-cli": "1.15.10",
+    "cozy-jobs-cli": "1.16.0",
     "cozy-konnector-build": "1.2.0"
   }
 }
