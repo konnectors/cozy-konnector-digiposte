@@ -91,7 +91,8 @@
     "LOGIN_OK",
     "METADATA_DEDUP",
     "CAPTCHA_RESOLUTION",
-    "CARBON_COPY"
+    "CARBON_COPY",
+    "DOC_QUALIFICATION_V2"
   ],
   "manifest_version": "2"
 }
