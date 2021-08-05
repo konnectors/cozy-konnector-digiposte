@@ -22,6 +22,10 @@ request = requestFactory({
   jar: j
 })
 
+// Importing models to get qualification by label
+const models = cozyClient.new.models
+const { Qualification } = models.document
+
 let xsrfToken = null
 let accessToken = null
 
@@ -350,8 +354,8 @@ async function fetchFolder(body, rootPath, timeout) {
         }
       }
 
-      // Orange payslip specific
-      if (doc.category === 'Bulletin de paie' && doc.author_name === 'Orange') {
+      // Payslip specific
+      if (doc.category === 'Bulletin de paie') {
         const creationDateObj = new Date(doc.creation_date)
         const nextMonthObj = new Date(
           Date.UTC(
@@ -369,20 +373,30 @@ async function fetchFolder(body, rootPath, timeout) {
           Date.UTC(creationDateObj.getFullYear(), creationDateObj.getMonth(), 1)
         ).toISOString()
 
-        tmpDoc.fileAttributes = {
-          metadata: {
-            ...tmpDoc.fileAttributes.medata,
+        tmpDoc.fileAttributes.metadata = Object.assign(
+          tmpDoc.fileAttributes.metadata,
+          {
             electronicSafe: true,
-            classification: 'payslip',
             datetime: firstDayStg,
             datetimeLabel: 'startDate',
-            contentAuthor: 'orange',
             startDate: firstDayStg,
             endDate: lastDayObj.toISOString(),
-            issueDate: doc.creation_date
+            issueDate: doc.creation_date,
+            qualification: Qualification.getByLabel('pay_sheet')
           }
-        }
+        )
       }
+
+      // Orange payslip specific, we attribute contentAuthor
+      if (doc.category === 'Bulletin de paie' && doc.author_name === 'Orange') {
+        tmpDoc.fileAttributes.metadata = Object.assign(
+          tmpDoc.fileAttributes.metadata,
+          {
+            contentAuthor: 'orange'
+          }
+        )
+      }
+
       return tmpDoc
     })
     if (result && result.docs) {
