@@ -71,7 +71,7 @@ async function login(fields, fingerprint) {
     resolveWithFullResponse: true
   })
   const state = respInit.request.href.match(/state=([0-9a-z-]*)/)[1]
-  const codeChallenge = respInit.request.href.match(/code_challenge=(.*?)&/)[1]
+  const codeChallenge = respInit.request.headers.referer.match(/code_challenge=(.*?)&/)[1]
   await request.get({
     uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=${fingerprint}`
   })
