@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "bluebird": "3.7.2",
-    "cozy-konnector-libs": "4.42.2",
+    "cozy-konnector-libs": "4.42.3",
     "date-fns": "2.23.0"
   },
   "devDependencies": {
