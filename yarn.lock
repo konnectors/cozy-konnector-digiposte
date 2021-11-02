@@ -1141,7 +1141,7 @@ cozy-client-js@^0.19.0:
     pouchdb-browser "7.0.0"
     pouchdb-find "7.0.0"
 
-cozy-client@23.4.0, cozy-client@^23.4.0:
+cozy-client@23.4.0:
   version "23.4.0"
   resolved "https://registry.yarnpkg.com/cozy-client/-/cozy-client-23.4.0.tgz#edb310971939f61506baef5f29a1a1806d39aae9"
   integrity sha512-Wcyjd08gkEWf3nFXlVg6UHek29WtPhW1SK316cbWt8laDK5a+qaHdg8sh/nMgM6tk++qNEppRY+VIpyscXEKDg==
@@ -1251,36 +1251,7 @@ cozy-konnector-build@1.2.3:
     webpack "5.59.1"
     webpack-cli "4.9.1"
 
-cozy-konnector-libs@4.42.3:
-  version "4.42.3"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.42.3.tgz#721bd3a2c818162d44fc061d5c167c314a76bd73"
-  integrity sha512-N9HiKULPAZk3Qp6FVxzPBl/+fF27YVTFfjgD904dtXBr56QuCTEGzkr3jd97v/tXhl7ve/tA0LzHSyItc1i5Bg==
-  dependencies:
-    babel-runtime "^6.26.0"
-    bluebird "^3.7.2"
-    bluebird-retry "^0.11.0"
-    btoa "1.2.1"
-    cheerio "^1.0.0-rc.9"
-    classificator "^0.3.3"
-    cozy-client "^23.4.0"
-    cozy-client-js "^0.19.0"
-    cozy-doctypes "^1.82.2"
-    cozy-logger "^1.7.0"
-    date-fns "^2.22.1"
-    file-type "^16.5.0"
-    geco "^0.11.1"
-    lodash-id "^0.14.0"
-    lowdb "^1.0.0"
-    mime-types "^2.1.31"
-    node-fetch "^2.6.1"
-    raven "^2.6.4"
-    raw-body "^2.4.1"
-    request "^2.88.2"
-    request-debug "^0.2.0"
-    request-promise "^4.2.6"
-    strip-json-comments "^3.1.1"
-
-cozy-konnector-libs@^4.43.0:
+cozy-konnector-libs@4.43.0, cozy-konnector-libs@^4.43.0:
   version "4.43.0"
   resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-4.43.0.tgz#c1d631caace0c965dab0080b7711ec6165000458"
   integrity sha512-3/o6vypJm4pFWiZDaaKdbDdg11NCXnsaXUkgzH12X0lm4eIQnyon6MaDcBqr38dgAdaZf4JlST9+WpIxrmqXaw==
