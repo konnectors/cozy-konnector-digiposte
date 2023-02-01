@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- '12.22.12'
+- '16.18.1'
 env:
   global:
   - MATTERMOST_CHANNEL=publication
@@ -31,7 +31,7 @@ deploy:
   on:
     tags: true
 before_install:
-- openssl aes-256-cbc -K $encrypted_38dfeae23772_key -iv $encrypted_38dfeae23772_iv
+- openssl aes-256-cbc -K $encrypted_8ebb1ef83f64_key -iv $encrypted_8ebb1ef83f64_iv
   -in github_deploy_key.enc -out /tmp/github_deploy_key -d
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/github_deploy_key
