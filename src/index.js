@@ -126,6 +126,13 @@ async function login(fields, fingerprint) {
     await this.notifySuccessfulLogin()
     return true
   }
+  const fingerPrintResponseBody = fingerPrintResp.body.html()
+  if (
+    fingerPrintResponseBody.includes('execution=mon_compte_onboarding_2fa_sms')
+  ) {
+    log('warn', 'Onboarding not completed : website is asking for phone number')
+    throw new Error('USER_ACTION_NEEDED')
+  }
   const otpUrl = fingerPrintResp.body
     .html()
     .match(
@@ -134,9 +141,9 @@ async function login(fields, fingerprint) {
     .split(' ')[2]
     .replace(/'/g, '')
   if (
-    fingerPrintResp.body
-      .html()
-      .match('page_name: "connexion_challenge_new_device_otp_email"')
+    fingerPrintResponseBody.match(
+      'page_name: "connexion_challenge_new_device_otp_email"'
+    )
   ) {
     log('info', 'Asking for mailOTP')
     await handle2FAMailOTP.bind(this)(otpUrl)
