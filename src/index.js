@@ -213,35 +213,7 @@ async function handle2FA(otpUrl) {
   const code = await this.waitForTwoFaCode({
     type: 'sms'
   })
-  let response
-  let nextStepUrl
-  const [digit1, digit2, digit3, digit4, digit5, digit6] = code.split('')
-  try {
-    response = await request.post(otpUrl, {
-      form: {
-        step: 'otp',
-        code,
-        digit1,
-        digit2,
-        digit3,
-        digit4,
-        digit5,
-        digit6
-      },
-      resolveWithFullResponse: true
-    })
-    nextStepUrl = response.body
-      .html()
-      .match(
-        / send: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
-      )[0]
-      .split(' ')[2]
-      .replace(/'/g, '')
-  } catch (e) {
-    if (e.statusCode === 401) {
-      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
-    } else throw e
-  }
+  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
   if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
     response = await request.post(nextStepUrl, {
       form: {
@@ -265,35 +237,7 @@ async function handle2FAMailOTP(otpUrl) {
   // Email encourage code in XXX-XXX form, we remove the hyphen if found
   code = code.replace('-', '')
   // Validating the code
-  let response
-  let nextStepUrl
-  const [digit1, digit2, digit3, digit4, digit5, digit6] = code.split('')
-  try {
-    response = await request.post(otpUrl, {
-      form: {
-        step: 'otp',
-        code,
-        digit1,
-        digit2,
-        digit3,
-        digit4,
-        digit5,
-        digit6
-      },
-      resolveWithFullResponse: true
-    })
-    nextStepUrl = response.body
-      .html()
-      .match(
-        / send: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
-      )[0]
-      .split(' ')[2]
-      .replace(/'/g, '')
-  } catch (e) {
-    if (e.statusCode === 401) {
-      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
-    } else throw e
-  }
+  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
   if (
     response.body
       .html()
@@ -322,6 +266,24 @@ async function handle2FAAppOTP(otpUrl) {
   // Email encourage code in XXX-XXX form, we remove the hyphen if found
   code = code.replace('-', '')
   // Validating the code
+  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
+  if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
+    response = await request.post(nextStepUrl, {
+      form: {
+        trusted: 'true'
+      },
+      resolveWithFullResponse: true
+    })
+  }
+  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+    return true
+  } else {
+    log('error', 'Unknown error after validating App twoFACode')
+    throw new Error('VENDOR_DOWN')
+  }
+}
+
+async function handleOTPRequest(code, otpUrl) {
   let response
   let nextStepUrl
   const [digit1, digit2, digit3, digit4, digit5, digit6] = code.split('')
@@ -351,20 +313,7 @@ async function handle2FAAppOTP(otpUrl) {
       throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
     } else throw e
   }
-  if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
-    response = await request.post(nextStepUrl, {
-      form: {
-        trusted: 'true'
-      },
-      resolveWithFullResponse: true
-    })
-  }
-  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
-    return true
-  } else {
-    log('error', 'Unknown error after validating App twoFACode')
-    throw new Error('VENDOR_DOWN')
-  }
+  return { response, nextStepUrl }
 }
 
 // create a folder if it does not already exist
