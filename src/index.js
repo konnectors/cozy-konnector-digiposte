@@ -68,66 +68,88 @@ async function login(fields, fingerprint) {
   }
   const respInit = await request.get({
     uri: 'https://secure.digiposte.fr/identification-plus',
-    resolveWithFullResponse: true
+    resolveWithFullResponse: true,
+    followAllRedirects: true
   })
-  const state = respInit.request.href.match(/state=([0-9a-z-]*)/)[1]
-  const codeChallenge = respInit.request.headers.referer.match(/code_challenge=(.*?)&/)[1]
-  await request.get({
-    uri: `https://auth.digiposte.fr/signin?client_id=ihm_abonne&code_challenge=${codeChallenge}&redirect_uri=https%3A%2F%2Fsecure.digiposte.fr%2Fcallback&state=${state}&fingerprint=${fingerprint}`
-  })
-
+  const loginUrl = respInit.body
+    .html()
+    .match(
+      /login: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
+    )[0]
+    .split(' ')[1]
+    .replace(/'/g, '')
+  log('info', 'captcha')
   const secureToken = await solveCaptcha({
     type: 'hcaptcha',
-    websiteKey: '0caa33b7-a445-43e4-a258-5affe1597c49',
-    websiteURL: 'https://compte.laposte.fr/fo/v1/login?captcha=1'
+    websiteKey: '1065fb72-99c2-4432-87af-c30b887fefa1',
+    websiteURL: 'https://moncompte.laposte.fr/'
   })
 
-  const response = await request.post('https://compte.laposte.fr/v2/signin', {
+  const response = await request.post(loginUrl, {
     form: {
       'g-recaptcha-response': secureToken,
       'h-captcha-response': secureToken,
-      user_type: 'PART',
-      _username: fields.email,
-      _password: fields.password
+      username: fields.email,
+      password: fields.password
+    },
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0',
+      Accept:
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'same-origin',
+      'Sec-Fetch-User': '?1'
     },
     resolveWithFullResponse: true
   })
-
-  if (
-    response.request.uri.href === 'https://compte.laposte.fr/fo/v1/login' ||
-    response.request.uri.href ===
-      'https://compte.laposte.fr/fo/v1/login?captcha=1'
-  ) {
-    throw new Error(errors.LOGIN_FAILED)
-  } else if (response.request.uri.href === 'https://secure.digiposte.fr/') {
+  const fingerPrintUrl = response.body
+    .html()
+    .match(
+      /"https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&amp;execution=(.*)&amp;client_id=(.*)&amp;tab_id=(.*)" /g
+    )[0]
+    .replace(/"/g, '')
+    .replace(/&amp;/g, '&')
+    .trim()
+  const fingerPrintResp = await request.post(fingerPrintUrl, {
+    form: {
+      fp: fingerprint
+    },
+    resolveWithFullResponse: true,
+    followAllRedirects: true
+  })
+  if (fingerPrintResp.request.uri.href === 'https://secure.digiposte.fr/') {
     await this.notifySuccessfulLogin()
     return true
-  } else if (
-    response.request.uri.href === 'https://secure.digiposte.fr/question-secret'
+  }
+  const otpUrl = fingerPrintResp.body
+    .html()
+    .match(
+      / send: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
+    )[0]
+    .split(' ')[2]
+    .replace(/'/g, '')
+  if (
+    fingerPrintResp.body
+      .html()
+      .match('page_name: "connexion_challenge_new_device_otp_email"')
   ) {
-    throw new Error(errors.USER_ACTION_NEEDED_CGU_FORM)
-  } else if (
-    response.request.uri.href === 'https://compte.laposte.fr/fo/v1/checkpoint'
-  ) {
-    await handle2FA.bind(this)()
+    log('info', 'Asking for mailOTP')
+    await handle2FAMailOTP.bind(this)(otpUrl)
     await this.notifySuccessfulLogin()
-  } else if (
-    response.request.uri.href.includes('https://auth.digiposte.fr/totp?state=')
-  ) {
-    // This url is triggered when manual OTP in app is activated by user
-    const state = response.request.uri.href.match(/state=([0-9a-z-]*)/)[1]
-    const code = response.request.headers.referer.match(/code=([0-9a-z]*)/)[1]
-    await handle2FAAppOTP.bind(this)(state, code)
+  }
+  if (fingerPrintResp.body.html().match('page_name: "connexion_totp"')) {
+    log('info', 'Asking for AppOTP')
+    await handle2FAAppOTP.bind(this)(otpUrl)
     await this.notifySuccessfulLogin()
-  } else if (
-    response.request.uri.href.includes(
-      'https://auth.digiposte.fr/otp-mail?state='
-    )
-  ) {
-    // This url is triggered when manual OTP is forced by digiposte
-    const state = response.request.uri.href.match(/state=([0-9a-z-]*)/)[1]
-    const code = response.request.headers.referer.match(/code=([0-9a-z]*)/)[1]
-    await handle2FAMailOTP.bind(this)(state, code)
+  }
+  if (fingerPrintResp.body.html().match('page_name: "connexion_otp_sms"')) {
+    log('info', 'Asking for SmsOTP')
+    await handle2FA.bind(this)(otpUrl)
     await this.notifySuccessfulLogin()
   } else {
     log(
@@ -187,47 +209,47 @@ async function fetchTokens() {
   })
 }
 
-async function handle2FA() {
+async function handle2FA(otpUrl) {
   const code = await this.waitForTwoFaCode({
     type: 'sms'
   })
-  const response = await request.post('https://compte.laposte.fr/v2/2fa', {
-    form: { code },
-    resolveWithFullResponse: true
-  })
+  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
+  if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
+    response = await request.post(nextStepUrl, {
+      form: {
+        trusted: 'true'
+      },
+      resolveWithFullResponse: true
+    })
+  }
   if (response.request.uri.href === 'https://secure.digiposte.fr/') {
     return true
   } else {
-    throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
+    log('error', 'Unknown error after validating App twoFACode')
+    throw new Error('VENDOR_DOWN')
   }
 }
 
-async function handle2FAMailOTP(state, codeLogin) {
+async function handle2FAMailOTP(otpUrl) {
   let code = await this.waitForTwoFaCode({
     type: 'email'
   })
   // Email encourage code in XXX-XXX form, we remove the hyphen if found
   code = code.replace('-', '')
   // Validating the code
-  let response
-  try {
-    response = await request.post(`https://auth.digiposte.fr/otp`, {
+  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
+  if (
+    response.body
+      .html()
+      .match('page_name: "connexion_challenge_new_device_add_mobile"')
+  ) {
+    response = await request.post(nextStepUrl, {
       form: {
-        otpMail: code,
-        state
+        do_add_phone_skip_step: 'true'
       },
       resolveWithFullResponse: true
     })
-  } catch (e) {
-    if (e.statusCode === 401) {
-      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
-    } else throw e
   }
-  // Ending login
-  response = await request({
-    uri: `https://secure.digiposte.fr/callback?code=${codeLogin}&state=${state}`,
-    resolveWithFullResponse: true
-  })
   if (response.request.uri.href === 'https://secure.digiposte.fr/') {
     return true
   } else {
@@ -236,7 +258,7 @@ async function handle2FAMailOTP(state, codeLogin) {
   }
 }
 
-async function handle2FAAppOTP(state, codeLogin) {
+async function handle2FAAppOTP(otpUrl) {
   log('debug', 'Handle 2FA for app_code')
   let code = await this.waitForTwoFaCode({
     type: 'app_code'
@@ -244,31 +266,54 @@ async function handle2FAAppOTP(state, codeLogin) {
   // Email encourage code in XXX-XXX form, we remove the hyphen if found
   code = code.replace('-', '')
   // Validating the code
-  let response
-  try {
-    response = await request.post(`https://auth.digiposte.fr/totp`, {
+  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
+  if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
+    response = await request.post(nextStepUrl, {
       form: {
-        totpCode: code,
-        state
+        trusted: 'true'
       },
       resolveWithFullResponse: true
     })
-  } catch (e) {
-    if (e.statusCode === 401) {
-      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
-    } else throw e
   }
-  // Ending login
-  response = await request({
-    uri: `https://secure.digiposte.fr/callback?code=${codeLogin}&state=${state}`,
-    resolveWithFullResponse: true
-  })
   if (response.request.uri.href === 'https://secure.digiposte.fr/') {
     return true
   } else {
     log('error', 'Unknown error after validating App twoFACode')
     throw new Error('VENDOR_DOWN')
   }
+}
+
+async function handleOTPRequest(code, otpUrl) {
+  let response
+  let nextStepUrl
+  const [digit1, digit2, digit3, digit4, digit5, digit6] = code.split('')
+  try {
+    response = await request.post(otpUrl, {
+      form: {
+        step: 'otp',
+        code,
+        digit1,
+        digit2,
+        digit3,
+        digit4,
+        digit5,
+        digit6
+      },
+      resolveWithFullResponse: true
+    })
+    nextStepUrl = response.body
+      .html()
+      .match(
+        / send: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
+      )[0]
+      .split(' ')[2]
+      .replace(/'/g, '')
+  } catch (e) {
+    if (e.statusCode === 401) {
+      throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
+    } else throw e
+  }
+  return { response, nextStepUrl }
 }
 
 // create a folder if it does not already exist
