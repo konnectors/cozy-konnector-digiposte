@@ -107,8 +107,14 @@ async function login(fields, fingerprint) {
     },
     resolveWithFullResponse: true
   })
-  const fingerPrintUrl = response.body
-    .html()
+  const loginResponseBody = response.body.html()
+  if (
+    loginResponseBody.match('identifiant et/ou le mot de passe sont incorrects')
+  ) {
+    log('warn', 'Something went wrong with the credentials')
+    throw new Error('LOGIN_FAILED')
+  }
+  const fingerPrintUrl = loginResponseBody
     .match(
       /"https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&amp;execution=(.*)&amp;client_id=(.*)&amp;tab_id=(.*)" /g
     )[0]
