@@ -137,7 +137,7 @@ async function login(fields, fingerprint) {
     fingerPrintResponseBody.includes('execution=mon_compte_onboarding_2fa_sms')
   ) {
     log('warn', 'Onboarding not completed : website is asking for phone number')
-    throw new Error('USER_ACTION_NEEDED')
+    throw new Error('USER_ACTION_NEEDED.ASK_PHONE_NUMBER')
   }
   const otpUrl = fingerPrintResp.body
     .html()
