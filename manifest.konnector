@@ -1,5 +1,5 @@
 {
-  "version": "1.22.0",
+  "version": "1.23.0",
   "name": "Digiposte",
   "type": "konnector",
   "language": "node",
@@ -7,7 +7,7 @@
   "slug": "digiposte",
   "source": "git@github.com:konnectors/cozy-konnector-digiposte.git",
   "editor": "Cozy",
-  "vendor_link": "https://compte.laposte.fr/fo/v1/login",
+  "vendor_link": "https://secure.digiposte.fr/identification-plus",
   "categories": [
     "online_services"
   ],
