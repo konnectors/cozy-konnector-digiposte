@@ -19,7 +19,11 @@ request = requestFactory({
   // debug: true,
   cheerio: true,
   json: false,
-  jar: j
+  jar: j,
+  headers: {
+    'User-Agent':
+      'Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0'
+  }
 })
 
 // Importing models to get qualification by label
@@ -66,6 +70,7 @@ async function login(fields, fingerprint) {
   if (process.env.COZY_JOB_MANUAL_EXECUTION == 'true') {
     log('warn', 'Login during a manual execution')
   }
+  // Fetching form and OAuth link
   const respInit = await request.get({
     uri: 'https://secure.digiposte.fr/identification-plus',
     resolveWithFullResponse: true,
@@ -73,18 +78,18 @@ async function login(fields, fingerprint) {
   })
   const loginUrl = respInit.body
     .html()
-    .match(
-      /login: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
-    )[0]
+    .match(/login: 'https:\/\/(.*)'/g)[0]
     .split(' ')[1]
     .replace(/'/g, '')
-  log('info', 'captcha')
+
+  log('debug', 'Solving captcha')
   const secureToken = await solveCaptcha({
     type: 'hcaptcha',
     websiteKey: '1065fb72-99c2-4432-87af-c30b887fefa1',
     websiteURL: 'https://moncompte.laposte.fr/'
   })
 
+  // Sending form with credentials and captcha key
   const response = await request.post(loginUrl, {
     form: {
       'g-recaptcha-response': secureToken,
@@ -92,28 +97,20 @@ async function login(fields, fingerprint) {
       username: fields.email,
       password: fields.password
     },
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0',
-      Accept:
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-      'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Upgrade-Insecure-Requests': '1',
-      'Sec-Fetch-Dest': 'document',
-      'Sec-Fetch-Mode': 'navigate',
-      'Sec-Fetch-Site': 'same-origin',
-      'Sec-Fetch-User': '?1'
-    },
     resolveWithFullResponse: true
   })
   const loginResponseBody = response.body.html()
-  if (
+  if (loginResponseBody.match('Erreur de validation du Captcha')) {
+    log('error', 'Captcha failed')
+    throw new Error('VENDOR_DOWN.CAPTCHA_FAILED')
+  } else if (
     loginResponseBody.match('identifiant et/ou le mot de passe sont incorrects')
   ) {
     log('warn', 'Something went wrong with the credentials')
     throw new Error('LOGIN_FAILED')
   }
+
+  // Get the 'consolidated token' via fingerprint
   const fingerPrintUrl = loginResponseBody
     .match(
       /"https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&amp;execution=(.*)&amp;client_id=(.*)&amp;tab_id=(.*)" /g
@@ -128,48 +125,80 @@ async function login(fields, fingerprint) {
     resolveWithFullResponse: true,
     followAllRedirects: true
   })
-  if (fingerPrintResp.request.uri.href === 'https://secure.digiposte.fr/') {
+  // Checking login status
+  let status = ''
+  let resp = fingerPrintResp
+  let body
+
+  while (status !== 'logged' && status !== 'error') {
+    body = resp.body.html()
+    if (resp.request.uri.href === 'https://secure.digiposte.fr/home') {
+      // We are logged
+      log('debug', 'Login success without OTP')
+      status = 'logged'
+    } else if (
+      body.includes('page_name: "connexion_challenge_new_device_add_mobile"')
+    ) {
+      // We need to pass this page inviting to add phone number
+      log('info', 'Pass page inviting to add phone')
+      const passPhoneUrl = body
+        .match(/send: 'https:\/\/(.*)'/g)[0]
+        .split(' ')[1]
+        .replace(/'/g, '')
+      resp = await request.post(passPhoneUrl, {
+        form: {
+          do_add_phone_skip_step: 'true'
+        },
+        resolveWithFullResponse: true
+      })
+    } else if (body.includes("page_name: 'connexion_add_2FA'")) {
+      // We need to pass this page inviting to add 2FA
+      log('info', 'Pass page inviting to add 2FA')
+      const pass2FAAddingUrl = body
+        .match(/send: 'https:\/\/(.*)'/g)[0]
+        .split(' ')[1]
+        .replace(/'/g, '')
+      resp = await request.post(pass2FAAddingUrl, {
+        form: {
+          step: 'choice',
+          action: 'later'
+        },
+        resolveWithFullResponse: true
+      })
+    } else if (body.match(/send: 'https:\/\/(.*)'/g)[0]) {
+      // We encounter a 2FA
+      log('debug', 'Found a 2FA, searching type')
+      // We select url to use
+      const otpUrl = body
+        .match(/send: 'https:\/\/(.*)'/g)[0]
+        .split(' ')[1]
+        .replace(/'/g, '')
+      if (body.match('page_name: "connexion_challenge_new_device_otp_email"')) {
+        log('info', 'Asking for mailOTP')
+        resp = await handle2FAMailOTP.bind(this)(otpUrl)
+      } else if (body.match('page_name: "connexion_totp"')) {
+        log('info', 'Asking for AppOTP')
+        resp = await handle2FAAppOTP.bind(this)(otpUrl)
+      } else if (body.match('page_name: "connexion_otp_sms"')) {
+        log('info', 'Asking for SmsOTP')
+        resp = await handle2FA.bind(this)(otpUrl)
+      } else {
+        log(
+          'error',
+          `Wrong resulting url during 2FA, unknown 2FA ? : ${resp.request.uri.href}`
+        )
+        throw new Error(errors.UNKOWN_ERROR)
+      }
+    } else {
+      status === 'error'
+    }
+  }
+  if (status === 'logged') {
     await this.notifySuccessfulLogin()
     return true
-  }
-  const fingerPrintResponseBody = fingerPrintResp.body.html()
-  if (
-    fingerPrintResponseBody.includes('execution=mon_compte_onboarding_2fa_sms')
-  ) {
-    log('warn', 'Onboarding not completed : website is asking for phone number')
-    throw new Error('USER_ACTION_NEEDED.ASK_PHONE_NUMBER')
-  }
-  const otpUrl = fingerPrintResp.body
-    .html()
-    .match(
-      / send: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
-    )[0]
-    .split(' ')[2]
-    .replace(/'/g, '')
-  if (
-    fingerPrintResponseBody.match(
-      'page_name: "connexion_challenge_new_device_otp_email"'
-    )
-  ) {
-    log('info', 'Asking for mailOTP')
-    await handle2FAMailOTP.bind(this)(otpUrl)
-    await this.notifySuccessfulLogin()
-  }
-  if (fingerPrintResp.body.html().match('page_name: "connexion_totp"')) {
-    log('info', 'Asking for AppOTP')
-    await handle2FAAppOTP.bind(this)(otpUrl)
-    await this.notifySuccessfulLogin()
-  }
-  if (fingerPrintResp.body.html().match('page_name: "connexion_otp_sms"')) {
-    log('info', 'Asking for SmsOTP')
-    await handle2FA.bind(this)(otpUrl)
-    await this.notifySuccessfulLogin()
   } else {
-    log(
-      'error',
-      `Wrong resulting url after login: ${response.request.uri.href}`
-    )
-    throw new Error(errors.VENDOR_DOWN)
+    log('error', 'Wrong result during login, unknown case')
+    throw new Error(errors.UNKOWN_ERROR)
   }
 }
 
@@ -194,6 +223,7 @@ async function fetchTokens() {
 
   // Get the access token
   log('info', 'Getting the app access token')
+  // From now we will use request JSON mode
   request = requestFactory({
     cheerio: false,
     json: true,
@@ -226,8 +256,13 @@ async function handle2FA(otpUrl) {
   const code = await this.waitForTwoFaCode({
     type: 'sms'
   })
-  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
+  let response = await handleOTPRequest(code, otpUrl)
   if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
+    const nextStepUrl = response.body
+      .html()
+      .match(/send: 'https:\/\/(.*)'/g)[0]
+      .split(' ')[1]
+      .replace(/'/g, '')
     response = await request.post(nextStepUrl, {
       form: {
         trusted: 'true'
@@ -235,40 +270,19 @@ async function handle2FA(otpUrl) {
       resolveWithFullResponse: true
     })
   }
-  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
-    return true
-  } else {
-    log('error', 'Unknown error after validating App twoFACode')
-    throw new Error('VENDOR_DOWN')
-  }
+  return response
 }
 
 async function handle2FAMailOTP(otpUrl) {
+  log('info', 'Launching 2FA by mail')
   let code = await this.waitForTwoFaCode({
     type: 'email'
   })
   // Email encourage code in XXX-XXX form, we remove the hyphen if found
   code = code.replace('-', '')
   // Validating the code
-  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
-  if (
-    response.body
-      .html()
-      .match('page_name: "connexion_challenge_new_device_add_mobile"')
-  ) {
-    response = await request.post(nextStepUrl, {
-      form: {
-        do_add_phone_skip_step: 'true'
-      },
-      resolveWithFullResponse: true
-    })
-  }
-  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
-    return true
-  } else {
-    log('error', 'Unknown error after validating twoFACode')
-    throw new Error('VENDOR_DOWN')
-  }
+  let response = await handleOTPRequest(code, otpUrl)
+  return response
 }
 
 async function handle2FAAppOTP(otpUrl) {
@@ -279,8 +293,13 @@ async function handle2FAAppOTP(otpUrl) {
   // Email encourage code in XXX-XXX form, we remove the hyphen if found
   code = code.replace('-', '')
   // Validating the code
-  let { response, nextStepUrl } = await handleOTPRequest(code, otpUrl)
+  let response = await handleOTPRequest(code, otpUrl)
   if (response.body.html().match('page_name: "connexion_otp_trusted_device"')) {
+    const nextStepUrl = response.body
+      .html()
+      .match(/send: 'https:\/\/(.*)'/g)[0]
+      .split(' ')[1]
+      .replace(/'/g, '')
     response = await request.post(nextStepUrl, {
       form: {
         trusted: 'true'
@@ -288,17 +307,11 @@ async function handle2FAAppOTP(otpUrl) {
       resolveWithFullResponse: true
     })
   }
-  if (response.request.uri.href === 'https://secure.digiposte.fr/') {
-    return true
-  } else {
-    log('error', 'Unknown error after validating App twoFACode')
-    throw new Error('VENDOR_DOWN')
-  }
+  return response
 }
 
 async function handleOTPRequest(code, otpUrl) {
   let response
-  let nextStepUrl
   const [digit1, digit2, digit3, digit4, digit5, digit6] = code.split('')
   try {
     response = await request.post(otpUrl, {
@@ -314,19 +327,12 @@ async function handleOTPRequest(code, otpUrl) {
       },
       resolveWithFullResponse: true
     })
-    nextStepUrl = response.body
-      .html()
-      .match(
-        / send: 'https:\/\/moncompte\.laposte\.fr\/moncompte-auth\/auth\/realms\/mon-compte\/login-actions\/authenticate\?session_code=(.*)&execution=(.*)&client_id=(.*)&tab_id=(.*)'/g
-      )[0]
-      .split(' ')[2]
-      .replace(/'/g, '')
   } catch (e) {
     if (e.statusCode === 401) {
       throw new Error('LOGIN_FAILED.WRONG_TWOFA_CODE')
     } else throw e
   }
-  return { response, nextStepUrl }
+  return response
 }
 
 // create a folder if it does not already exist
