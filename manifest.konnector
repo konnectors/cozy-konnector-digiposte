@@ -92,7 +92,8 @@
     "METADATA_DEDUP",
     "CAPTCHA_RESOLUTION",
     "CARBON_COPY",
-    "DOC_QUALIFICATION_V2"
+    "DOC_QUALIFICATION_V2",
+    "SENTRY_V2"
   ],
   "manifest_version": "2"
 }
