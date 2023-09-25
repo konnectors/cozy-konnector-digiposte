@@ -100,7 +100,12 @@ async function login(fields, fingerprint) {
     resolveWithFullResponse: true
   })
   const loginResponseBody = response.body.html()
-  if (loginResponseBody.match('Erreur de validation du Captcha')) {
+  if (
+    // Old captcha error in french
+    loginResponseBody.match('Erreur de validation du Captcha') ||
+    // New captcha error in english
+    loginResponseBody.match('Captcha validation error')
+  ) {
     log('error', 'Captcha failed')
     throw new Error('VENDOR_DOWN.CAPTCHA_FAILED')
   } else if (
