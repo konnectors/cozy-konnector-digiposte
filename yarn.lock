@@ -2546,10 +2546,10 @@ cozy-konnector-build@1.5.1:
     webpack "5.76.0"
     webpack-cli "4.9.2"
 
-cozy-konnector-libs@5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-5.4.0.tgz#420b8e3c2a3814ca43c896cfd78f4eb41def702a"
-  integrity sha512-sikugp4NfUugs6E0sKV9ftxQFxdFd6emt9OPQlBhQPUZEGzzFKUCzogZMA2cUEF1ivHq0ea6JML50ehin+Q9Iw==
+cozy-konnector-libs@5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-5.5.0.tgz#e2e9fa30dd1247e56d55f3bb5d29a15e247661ac"
+  integrity sha512-SBGlrjfaTZH+IV+GAE8bARgemKq5UbMqnZA7qBlBMJ/SXE9iI9J1klw5yg9D5bGraYBj2rmk12arnNqyk4hMFQ==
   dependencies:
     babel-runtime "^6.26.0"
     bluebird "^3.7.2"
