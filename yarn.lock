@@ -2632,10 +2632,10 @@ cozy-konnector-build@1.7.0:
     webpack "5.76.0"
     webpack-cli "4.9.2"
 
-cozy-konnector-libs@5.12.0:
-  version "5.12.0"
-  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-5.12.0.tgz#44d714b67c81682fb6b6577b837a82df3905864e"
-  integrity sha512-ZrfjuMMaFe7S+y8c5DNfwhuN3VwYxbD4hxQvwM4rzDGZrk3y3r2nG5hX1yyPtw5aQ83y2xCmtMb2nphWVeFRXw==
+cozy-konnector-libs@5.12.1:
+  version "5.12.1"
+  resolved "https://registry.yarnpkg.com/cozy-konnector-libs/-/cozy-konnector-libs-5.12.1.tgz#06962950df0997fcf1cccd28574c722a81467676"
+  integrity sha512-9JWYeTzg4l9KTcSlTmtw/9ttWcXo11+dZ2LhN9D/AjQoe8HqmNhKDvbBc52GHBXjZK6GHGFyOX5QjAP2mxzDnQ==
   dependencies:
     babel-runtime "^6.26.0"
     bluebird "^3.7.2"
@@ -2657,7 +2657,7 @@ cozy-konnector-libs@5.12.0:
     lodash-id "^0.14.0"
     lowdb "^1.0.0"
     mime-types "^2.1.31"
-    node-fetch "^2.6.1"
+    node-fetch "^2.7.0"
     raven "^2.6.4"
     raw-body "^2.4.1"
     request "^2.88.2"
@@ -4829,6 +4829,13 @@ node-fetch@2.6.7, node-fetch@^2.0.0, node-fetch@^2.6.1:
   version "2.6.7"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
   integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
+  dependencies:
+    whatwg-url "^5.0.0"
+
+node-fetch@^2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
+  integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
   dependencies:
     whatwg-url "^5.0.0"
 
